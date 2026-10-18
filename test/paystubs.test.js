@@ -118,3 +118,17 @@ test('reads reimbursement column labels declared on responsive table cells', () 
   assert.deepEqual(parsePaystubDetail(html, detailUrl).reimbursements, { current: '0.00', yearToDate: '7515.32' });
   assert.throws(() => parsePaystubDetail(html.replace('data-title="Current"', 'data-title="Year To Date"'), detailUrl), /columns/);
 });
+
+test('parses off-cycle and bonus labels embedded inside the pay-period value', () => {
+  for (const [label, start, end, payday, type] of [
+    ['Off-Cycle Payroll', 'Sep 1, 2026', 'Sep 30, 2026', 'Oct 2, 2026', 'off-cycle'],
+    ['Off-Cycle Payroll', 'Jun 30, 2026', 'Jun 30, 2026', 'Sep 4, 2026', 'off-cycle'],
+    ['Bonus Payroll', 'Sep 1, 2026', 'Sep 30, 2026', 'Oct 2, 2026', 'bonus']
+  ]) {
+    const html = `<p>Pay period: ${label} ${start} - ${end} Pay Day: ${payday}</p><a href="/payroll_items/${id}/paystub.pdf">Download PDF</a>`;
+    const parsed = parsePaystubDetail(html, detailUrl);
+    assert.equal(parsed.payrollType, type);
+    assert.equal(parsed.periodStart, start.startsWith('Jun') ? '2026-06-30' : '2026-09-01');
+    assert.equal(parsed.payDay, payday.startsWith('Oct') ? '2026-10-02' : '2026-09-04');
+  }
+});

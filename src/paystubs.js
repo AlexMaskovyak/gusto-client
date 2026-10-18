@@ -54,7 +54,7 @@ export function parsePaystubDetail(html, detailUrl) {
   const $ = cheerio.load(html);
   $('script,style').remove();
   const text = $.root().text().replace(/\s+/g, ' ');
-  const dates = text.match(/Pay period:\s*([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})\s*[-–—]\s*([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})\s+Pay Day:\s*([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})/i);
+  const dates = text.match(/Pay period:\s*(?:(?:Off[- ]Cycle|Bonus)\s+Payroll\s+)?([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})\s*[-–—]\s*([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})\s+Pay Day:\s*([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})/i);
   if (!dates) throw new Error('Unsupported Gusto paystub detail layout');
   const pdfHref = $('a[href*="/payroll_items/"][href*="paystub.pdf"]').first().attr('href');
   if (!pdfHref) throw new Error('Gusto paystub PDF endpoint not found');
