@@ -23,3 +23,20 @@ Each input record accepts `url`, `detailUrl`, or `href`, with optional `id` and 
 Transport and authentication are injected. Applications may compose this package with `browser-session-rest-client`, but neither package depends on the other. Errors stop the operation; callers retain inputs and retry after authentication or layout issues are resolved.
 
 See [the implementation plan](PLAN.md).
+
+## Reimbursement records
+
+Normalize expense responses and traverse their cursor connection with a caller-supplied, authorized page request:
+
+```js
+import { collectReimbursements } from 'gusto-client';
+
+const result = await collectReimbursements(
+  async ({ after }) => readExpenseQuery({ after }),
+  { memberId, expectedCount }
+);
+```
+
+The page reader returns the GraphQL response containing `data.member.expenses.expenses`. It must start without a cursor and include all statuses and dates needed by the caller. The collector checks member identity, stable IDs, page boundaries, non-progressing cursors, partial errors, and an optional expected count. It does not discover the request endpoint or its filters. Verify those from the authorized application before treating the result as account-wide coverage.
+
+Records retain decimal amount strings, nullable source currency, original status, creation time, purchase/check dates, approver, vendor, and receipt identity. Expiring receipt URLs are omitted. Unknown statuses remain unchanged. Creation time is not relabeled as a submission time, and a listed record or check date does not establish payment. Payroll evidence and downstream receipt reconciliation belong to the caller.
