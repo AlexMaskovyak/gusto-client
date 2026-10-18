@@ -1,5 +1,15 @@
 # Plan
 
+## Reimbursements
+
+- [ ] Discover the authenticated expense query, filters, cursor arguments, and count from the live browser; prove one client request before bulk collection.
+- [ ] Parse expense identity, original amount/currency, receipt identity, submission timestamp, source status, approval, and check date without inferring payment from submission.
+- [ ] Test complete cursor traversal, empty accounts, duplicate/conflicting IDs, partial GraphQL errors, missing pages, status drift, and malformed values with synthetic fixtures.
+- [ ] Add the observed read-only query through injected Fetch. Keep authentication, account IDs, snapshots, Sheet joins, and private reconciliation in the caller.
+- [ ] Verify a complete live collection against the UI count, then reconcile to the existing Sheet without submitting expenses or changing locked amounts.
+
+Gusto owns submitted-record state; payroll statements own payment proof. The client owns response normalization and pagination, not receipt matching or a parallel bookkeeping database. Preserve unknown status values rather than calling them unpaid. Null source currency stays null. Signed receipt URLs are omitted from normalized durable records. Authentication failures, schema drift, partial GraphQL errors, duplicate IDs, and non-progressing cursors stop collection; retain prior verified evidence and retry after correction. Completion requires both tests and a full authenticated live read, not a saved response alone.
+
 Build a standalone read-only Gusto paystub client with an injected Fetch-compatible transport.
 
 - [x] Enumerate paystub HTML pages and deduplicate by payroll-item UUID.
