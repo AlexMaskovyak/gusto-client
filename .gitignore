@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+*.auth.json
+*.storage-state.json
+manifests/
+staging/
+results.json
+
