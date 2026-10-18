@@ -48,3 +48,24 @@ test('uses an injected Fetch-compatible transport', async () => {
   assert.equal(details[0].payDay, '2026-10-16');
   assert.deepEqual(calls.map((call) => call.method), ['GET', 'GET']);
 });
+
+test('enumerates paystub pagination until the final partial page', async () => {
+  const ids = [
+    '11111111-2222-4333-8444-555555555555',
+    'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+    '99999999-8888-4777-8666-555555555555'
+  ];
+  const page = (items) => items.map((item) => `<a href="/payroll_items/${item}/paystub.html">Payday</a>`).join('');
+  const calls = [];
+  const client = new GustoClient({ baseUrl: 'https://app.gusto.test', fetch: async (url) => {
+    calls.push(url.toString());
+    const number = new URL(url).searchParams.get('page.number');
+    const body = number === '1' ? page(ids.slice(0, 2)) : page(ids.slice(2));
+    return { ok: true, status: 200, text: async () => body };
+  } });
+  const records = await client.discoverAllPaystubs({ pageSize: 2 });
+  assert.deepEqual(records.map((record) => record.id), ids);
+  assert.equal(calls.length, 2);
+  assert.match(calls[0], /page\.number=1/);
+  assert.match(calls[1], /page\.number=2/);
+});

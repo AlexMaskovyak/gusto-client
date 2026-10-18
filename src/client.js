@@ -27,6 +27,31 @@ export class GustoClient {
     return [...records.values()];
   }
 
+  paystubPageUrl({ pageNumber = 1, pageSize = 100 } = {}) {
+    const url = new URL('/employee/pay/paystubs', this.baseUrl);
+    url.searchParams.set('sort.direction', 'descending');
+    url.searchParams.set('sort.id', 'payDay');
+    url.searchParams.set('page.number', String(pageNumber));
+    url.searchParams.set('page.size', String(pageSize));
+    return url.toString();
+  }
+
+  async discoverAllPaystubs({ pageSize = 100, maxPages = 100 } = {}) {
+    const records = new Map();
+    for (let pageNumber = 1; pageNumber <= maxPages; pageNumber += 1) {
+      const pageUrl = this.paystubPageUrl({ pageNumber, pageSize });
+      const pageRecords = discoverPaystubLinks(await this.getText(pageUrl), pageUrl);
+      let added = 0;
+      for (const record of pageRecords) {
+        const prior = records.get(record.id);
+        if (prior && prior.url !== record.url) throw new Error(`Conflicting paystub URL for ${record.id}`);
+        if (!prior) { records.set(record.id, record); added += 1; }
+      }
+      if (pageRecords.length < pageSize || added === 0) return [...records.values()];
+    }
+    throw new Error(`Gusto pagination exceeded ${maxPages} pages`);
+  }
+
   async readPaystubDetails(records) {
     const details = [];
     for (const record of records) {

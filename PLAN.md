@@ -2,7 +2,7 @@
 
 Build a standalone read-only Gusto paystub client with an injected Fetch-compatible transport.
 
-- [x] Enumerate paystub-page HTML and deduplicate by payroll-item UUID.
+- [x] Enumerate every paystub page and deduplicate by payroll-item UUID.
 - [x] Parse pay date, service period, payroll type, and PDF endpoint.
 - [x] Generate collision-safe filenames and a credential-free manifest.
 - [ ] Download and verify PDFs through the injected transport.
