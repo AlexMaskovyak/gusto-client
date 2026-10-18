@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { GustoClient, buildPaystubManifest, discoverPaystubLinks, parsePaystubDetail } from '../src/index.js';
+import { GustoClient, buildPaystubManifest, discoverPaystubLinks, normalizePaystubRecords, parsePaystubDetail } from '../src/index.js';
 
 const id = '11111111-2222-4333-8444-555555555555';
 const detailUrl = `https://app.gusto.test/payroll_items/${id}/paystub.html?x_role_id=example`;
@@ -68,4 +68,44 @@ test('enumerates paystub pagination until the final partial page', async () => {
   assert.equal(calls.length, 2);
   assert.match(calls[0], /page\.number=1/);
   assert.match(calls[1], /page\.number=2/);
+});
+
+test('accepts browser-discovered records and verifies the unique expected count', async () => {
+  const records = [{ href: detailUrl, text: 'Oct 16, 2026' }, { url: detailUrl }];
+  assert.deepEqual(normalizePaystubRecords(records, { baseUrl: 'https://app.gusto.test', expectedCount: 1 }), [{ id, url: detailUrl, label: 'Oct 16, 2026' }]);
+  assert.throws(() => normalizePaystubRecords(records, { baseUrl: 'https://app.gusto.test', expectedCount: 2 }), /count mismatch/);
+  assert.throws(() => normalizePaystubRecords([{ id: 'wrong', url: detailUrl }], { baseUrl: 'https://app.gusto.test' }), /identity mismatch/);
+  assert.throws(() => normalizePaystubRecords([{ url: detailUrl }]), /endpoint/);
+});
+
+test('rejects client-rendered empty listings and repeated pagination', async () => {
+  const emptyClient = new GustoClient({ fetch: async () => ({ ok: true, text: async () => '<div id="root"></div>' }) });
+  await assert.rejects(emptyClient.discoverAllPaystubs(), /browser-enumerated/);
+  const repeated = new GustoClient({ baseUrl: 'https://app.gusto.test', fetch: async () => ({ ok: true, text: async () => `<a href="${detailUrl}">View</a>` }) });
+  await assert.rejects(repeated.discoverAllPaystubs({ pageSize: 1 }), /without progress/);
+});
+
+test('reports authentication and transport errors without exposing request secrets', async () => {
+  const client = new GustoClient({ fetch: async () => { throw new Error('cookie=private-value'); } });
+  await assert.rejects(client.getText('/path?token=private-value'), (error) => error.message === 'Gusto request transport failed');
+  const login = new GustoClient({ fetch: async () => ({ ok: true, url: 'https://app.gusto.com/login', text: async () => '' }) });
+  await assert.rejects(login.getText('/path'), /authentication required/);
+  const loginForm = new GustoClient({ fetch: async () => ({ ok: true, text: async () => '<form><input type="password"></form>' }) });
+  await assert.rejects(loginForm.getText('/path'), /authentication required/);
+});
+
+test('keeps current reimbursements separate from year-to-date totals', () => {
+  const html = `<main>Earnings Statement Pay period: Sep 28, 2026 - Oct 11, 2026 Pay Day: Oct 16, 2026
+  <table><tr><th>Description</th><th>Current</th><th>Year To Date</th></tr><tr><td>Total Reimbursements</td><td>$0.00</td><td>$7,515.32</td></tr></table>
+  <a href="/payroll_items/${id}/paystub.pdf">Download PDF</a></main>`;
+  assert.deepEqual(parsePaystubDetail(html, detailUrl).reimbursements, { current: '0.00', yearToDate: '7515.32' });
+  assert.throws(() => parsePaystubDetail(html.replace('Current</th><th>Year To Date', 'Year To Date</th><th>Current'), detailUrl), /columns/);
+});
+
+test('rejects invalid dates and a PDF belonging to another paystub', () => {
+  const html = `<main>Off-cycle Payroll Pay period: Feb 28, 2026 – Mar 11, 2026 Pay Day: Mar 16, 2026 <a href="/payroll_items/${id}/paystub.pdf">Download PDF</a></main>`;
+  assert.equal(parsePaystubDetail(html, detailUrl).payrollType, 'off-cycle');
+  assert.throws(() => parsePaystubDetail(html.replace('Feb 28', 'Feb 30'), detailUrl), /calendar date/);
+  assert.throws(() => parsePaystubDetail(html.replace('Feb 28, 2026 – Mar 11', 'Mar 28, 2026 – Mar 11'), detailUrl), /ends before/);
+  assert.throws(() => parsePaystubDetail(html.replace(`/payroll_items/${id}/paystub.pdf`, '/payroll_items/aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee/paystub.pdf'), detailUrl), /identity mismatch/);
 });

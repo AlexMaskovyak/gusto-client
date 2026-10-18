@@ -1,4 +1,4 @@
-import { discoverPaystubLinks, parsePaystubDetail } from './paystubs.js';
+import { discoverPaystubLinks, normalizePaystubRecords, parsePaystubDetail } from './paystubs.js';
 
 export class GustoClient {
   constructor({ fetch: fetchImpl, baseUrl = 'https://app.gusto.com' }) {
@@ -8,9 +8,15 @@ export class GustoClient {
   }
 
   async getText(url) {
-    const response = await this.fetch(new URL(url, this.baseUrl), { method: 'GET' });
+    let response;
+    try { response = await this.fetch(new URL(url, this.baseUrl), { method: 'GET' }); }
+    catch { throw new Error('Gusto request transport failed'); }
     if (!response.ok) throw new Error(`Gusto request failed with HTTP ${response.status}`);
-    return response.text();
+    if (response.url && /\/(?:login|sign_in|signin)(?:\/|$)/i.test(new URL(response.url).pathname)) throw new Error('Gusto authentication required');
+    let html;
+    try { html = await response.text(); } catch { throw new Error('Gusto response body could not be read'); }
+    if (/<input\b[^>]*type\s*=\s*["']?password\b/i.test(html)) throw new Error('Gusto authentication required');
+    return html;
   }
 
   async discoverFromPaystubPages(pageUrls) {
@@ -24,10 +30,11 @@ export class GustoClient {
         records.set(record.id, prior ?? record);
       }
     }
-    return [...records.values()];
+    return normalizePaystubRecords([...records.values()], { baseUrl: this.baseUrl });
   }
 
   paystubPageUrl({ pageNumber = 1, pageSize = 100 } = {}) {
+    if (![pageNumber, pageSize].every((value) => Number.isInteger(value) && value > 0)) throw new Error('Paystub page number and size must be positive integers');
     const url = new URL('/employee/pay/paystubs', this.baseUrl);
     url.searchParams.set('sort.direction', 'descending');
     url.searchParams.set('sort.id', 'payDay');
@@ -36,25 +43,29 @@ export class GustoClient {
     return url.toString();
   }
 
-  async discoverAllPaystubs({ pageSize = 100, maxPages = 100 } = {}) {
+  async discoverAllPaystubs({ pageSize = 100, maxPages = 100, expectedCount } = {}) {
+    if (!Number.isInteger(maxPages) || maxPages < 1) throw new Error('maxPages must be a positive integer');
     const records = new Map();
     for (let pageNumber = 1; pageNumber <= maxPages; pageNumber += 1) {
       const pageUrl = this.paystubPageUrl({ pageNumber, pageSize });
       const pageRecords = discoverPaystubLinks(await this.getText(pageUrl), pageUrl);
+      if (pageNumber === 1 && pageRecords.length === 0) throw new Error('No paystub links found; use browser-enumerated records for client-rendered listings');
       let added = 0;
       for (const record of pageRecords) {
         const prior = records.get(record.id);
         if (prior && prior.url !== record.url) throw new Error(`Conflicting paystub URL for ${record.id}`);
         if (!prior) { records.set(record.id, record); added += 1; }
       }
-      if (pageRecords.length < pageSize || added === 0) return [...records.values()];
+      if (pageRecords.length > 0 && added === 0) throw new Error('Gusto pagination repeated a page without progress');
+      if (pageRecords.length < pageSize) return normalizePaystubRecords([...records.values()], { baseUrl: this.baseUrl, expectedCount });
     }
     throw new Error(`Gusto pagination exceeded ${maxPages} pages`);
   }
 
-  async readPaystubDetails(records) {
+  async readPaystubDetails(records, { expectedCount } = {}) {
+    const normalized = normalizePaystubRecords(records, { baseUrl: this.baseUrl, expectedCount });
     const details = [];
-    for (const record of records) {
+    for (const record of normalized) {
       details.push(parsePaystubDetail(await this.getText(record.url), record.url));
     }
     return details;
