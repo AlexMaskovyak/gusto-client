@@ -2,7 +2,7 @@
 
 ## Reimbursements
 
-- [ ] Discover the authenticated expense query, filters, cursor arguments, and count from the live browser; prove one client request before bulk collection.
+- [x] Discover the authenticated expense query, filters, cursor arguments, and count from the live browser; prove one client request before bulk collection.
 - [x] Parse expense identity, original amount/currency, receipt identity, creation timestamp, source status, approval, and check date without inferring payment or relabeling creation as submission.
 - [x] Test complete cursor traversal, empty accounts, duplicate/conflicting IDs, partial GraphQL errors, missing pages, status drift, and malformed values with synthetic fixtures.
 - [x] Add the observed read-only query through injected Fetch, with an exact-query POST guard and bounded cursor variables. Keep authentication, account IDs, snapshots, Sheet joins, and private reconciliation in the caller.
