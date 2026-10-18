@@ -1,4 +1,5 @@
 import { discoverPaystubLinks, normalizePaystubRecords, parsePaystubDetail } from './paystubs.js';
+import { buildReimbursementRequest, collectReimbursements } from './reimbursements.js';
 
 export class GustoClient {
   constructor({ fetch: fetchImpl, baseUrl = 'https://app.gusto.com' }) {
@@ -69,5 +70,17 @@ export class GustoClient {
       details.push(parsePaystubDetail(await this.getText(record.url), record.url));
     }
     return details;
+  }
+
+  async listReimbursements({ pageSize = 100, expectedCount, maxPages, memberId } = {}) {
+    // Validate the first request before any network activity.
+    buildReimbursementRequest({ first: pageSize });
+    return collectReimbursements(async ({ after }) => {
+      const { url, ...options } = buildReimbursementRequest({ first: pageSize, after });
+      const response = await this.fetch(new URL(url), options);
+      if (!response.ok) throw new Error(`Gusto reimbursement request failed with HTTP ${response.status}`);
+      if (response.url && /\/(?:login|sign_in|signin)(?:\/|$)/i.test(new URL(response.url).pathname)) throw new Error('Gusto authentication required');
+      return response.json();
+    }, { expectedCount, maxPages, memberId });
   }
 }

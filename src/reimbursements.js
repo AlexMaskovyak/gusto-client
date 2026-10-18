@@ -1,3 +1,49 @@
+const REIMBURSEMENT_ENDPOINT = 'https://graphql.app.gusto.com/?operationName=MemberExpenses';
+const REIMBURSEMENT_QUERY = `query MemberExpenses($after: String, $first: Int) {
+  member {
+    id
+    expenses {
+      expenses(after: $after, first: $first, filter: {}, order: "-created_at") {
+        nodes {
+          id amount approvedBy categoryName checkDate createdAt currency
+          description displayName purchaseDate status statusReason
+          member { id }
+          receipt { id contentType name }
+          vendor { id name }
+        }
+        pageInfo { endCursor hasNextPage hasPreviousPage }
+      }
+    }
+  }
+}`;
+
+/** Build the fixed employee-expense read. Authentication belongs to the transport. */
+export function buildReimbursementRequest({ first = 100, after = null } = {}) {
+  if (!Number.isInteger(first) || first < 1 || first > 100) throw new Error('Reimbursement page size must be between 1 and 100');
+  if (after !== null && typeof after !== 'string') throw new Error('Invalid reimbursement cursor');
+  return {
+    url: REIMBURSEMENT_ENDPOINT,
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ operationName: 'MemberExpenses', query: REIMBURSEMENT_QUERY, variables: { first, after } })
+  };
+}
+
+/** Restrict an authenticated POST transport to the fixed read-only query. */
+export function isReadOnlyReimbursementRequest({ url, body } = {}) {
+  try {
+    if (new URL(url).href !== REIMBURSEMENT_ENDPOINT || typeof body !== 'string') return false;
+    const request = JSON.parse(body);
+    if (!request || Object.keys(request).sort().join(',') !== 'operationName,query,variables' ||
+        request.operationName !== 'MemberExpenses' || request.query !== REIMBURSEMENT_QUERY) return false;
+    const variables = request.variables;
+    return Boolean(variables && typeof variables === 'object' && !Array.isArray(variables) &&
+      Object.keys(variables).sort().join(',') === 'after,first' &&
+      Number.isInteger(variables.first) && variables.first >= 1 && variables.first <= 100 &&
+      (variables.after === null || typeof variables.after === 'string'));
+  } catch { return false; }
+}
+
 function object(value, message) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(message);
   return value;
@@ -42,6 +88,7 @@ function normalizeRecord(node, memberId) {
     id: string(node.id, 'ID'), memberId, amount,
     currency: string(node.currency, 'currency', { nullable: true }),
     status: string(node.status, 'status'),
+    statusReason: string(node.statusReason, 'status reason', { nullable: true }),
     createdAt, purchaseDate: date(node.purchaseDate, 'purchase date'),
     checkDate: date(node.checkDate, 'check date', { nullable: true }),
     approvedBy: string(node.approvedBy, 'approver', { nullable: true }),

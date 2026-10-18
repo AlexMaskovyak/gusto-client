@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { collectReimbursements, parseReimbursementPage } from '../src/index.js';
+import { GustoClient, buildReimbursementRequest, isReadOnlyReimbursementRequest, collectReimbursements, parseReimbursementPage } from '../src/index.js';
 
 const memberId = 'example-member';
 const record = (id = 'example-expense') => ({
@@ -77,4 +77,71 @@ test('rejects incomplete, repeated, conflicting, or changing pagination', async 
 
 test('does not turn transport errors into a successful partial collection', async () => {
   await assert.rejects(collectReimbursements(async () => { throw new Error('private-credential'); }), { message: 'Gusto reimbursement page request failed' });
+});
+
+test('builds a fixed read-only query with bounded cursor variables', () => {
+  const request = buildReimbursementRequest({ first: 10, after: 'example-cursor' });
+  assert.equal(request.url, 'https://graphql.app.gusto.com/?operationName=MemberExpenses');
+  assert.equal(request.method, 'POST');
+  assert.equal(isReadOnlyReimbursementRequest(request), true);
+  const payload = JSON.parse(request.body);
+  assert.deepEqual(payload.variables, { first: 10, after: 'example-cursor' });
+  assert.match(payload.query, /filter: \{\}, order: "-created_at"/);
+  assert.ok(!/approvableExpenses|vendors\(|\burl\b/.test(payload.query));
+  for (const first of [0, 101, 1.5, '10', null]) assert.throws(() => buildReimbursementRequest({ first }), /page size/);
+  assert.throws(() => buildReimbursementRequest({ after: 7 }), /cursor/);
+});
+
+test('rejects endpoint, query, operation and variable spoofing at the POST guard', () => {
+  const request = buildReimbursementRequest();
+  const payload = JSON.parse(request.body);
+  const modified = (change) => ({ ...request, body: JSON.stringify({ ...payload, ...change }) });
+  for (const invalid of [
+    { ...request, url: 'https://example.test/?operationName=MemberExpenses' },
+    { ...request, url: `${request.url}&extra=true` },
+    { ...request, url: `${request.url}#fragment` },
+    { ...request, body: payload }, { ...request, body: '{' },
+    modified({ query: 'mutation MemberExpenses { submitExpense { id } }' }),
+    modified({ query: `${payload.query}\nmutation Submit { submitExpense { id } }` }),
+    modified({ operationName: 'SubmitExpense' }),
+    modified({ extensions: {} }), modified({ variables: null }),
+    modified({ variables: { first: 101, after: null } }),
+    modified({ variables: { first: 100, after: null, teamExpenses: true } }),
+    modified({ variables: { first: 100 } }),
+    modified({ variables: { first: 100, after: {} } })
+  ]) assert.equal(isReadOnlyReimbursementRequest(invalid), false);
+  assert.equal(isReadOnlyReimbursementRequest(), false);
+});
+
+test('lists reimbursements through the injected guarded POST transport', async () => {
+  const calls = [];
+  const client = new GustoClient({ fetch: async (url, options) => {
+    assert.equal(isReadOnlyReimbursementRequest({ url, body: options.body }), true);
+    assert.equal(options.method, 'POST');
+    const { variables } = JSON.parse(options.body);
+    calls.push(variables);
+    return { ok: true, json: async () => variables.after === null ?
+      page([record('first')], { hasNextPage: true, endCursor: 'next' }) :
+      page([{ ...record('second'), statusReason: 'Awaiting payroll' }], { hasPreviousPage: true }) };
+  } });
+  const result = await client.listReimbursements({ pageSize: 1, expectedCount: 2 });
+  assert.deepEqual(calls, [{ first: 1, after: null }, { first: 1, after: 'next' }]);
+  assert.equal(result.pageCount, 2);
+  assert.equal(result.records[1].statusReason, 'Awaiting payroll');
+  assert.ok(!JSON.stringify(result).includes('example-secret'));
+});
+
+test('fails safely on HTTP, login, non-JSON and partial GraphQL responses', async () => {
+  for (const response of [
+    { ok: false, status: 401 }, { ok: false, status: 500 },
+    { ok: true, url: 'https://app.gusto.com/login', json: async () => page() },
+    { ok: true, json: async () => { throw new Error('<html>private-token</html>'); } }
+  ]) {
+    const client = new GustoClient({ fetch: async () => response });
+    await assert.rejects(client.listReimbursements(), { message: 'Gusto reimbursement page request failed' });
+  }
+  const partial = new GustoClient({ fetch: async () => ({ ok: true, json: async () => ({ ...page(), errors: [{ message: 'private-token' }] }) }) });
+  await assert.rejects(partial.listReimbursements(), { message: 'Gusto reimbursement query returned errors' });
+  const empty = new GustoClient({ fetch: async () => ({ ok: true, json: async () => page([]) }) });
+  assert.equal((await empty.listReimbursements({ expectedCount: 0 })).complete, true);
 });
