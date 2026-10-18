@@ -2,7 +2,9 @@
   "name": "gusto-client",
   "version": "0.1.0",
   "private": true,
-  "description": "Read-only client for discovering and downloading Gusto paystubs",
+  "description": "Read-only client for discovering Gusto paystubs and original PDF endpoints",
+  "license": "MIT",
+  "files": ["src", "README.md", "LICENSE"],
   "type": "module",
   "exports": "./src/index.js",
   "scripts": {
