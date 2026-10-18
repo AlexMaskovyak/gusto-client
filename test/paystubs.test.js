@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildPaystubManifest, discoverPaystubLinks, parsePaystubDetail } from '../src/index.js';
+import { GustoClient, buildPaystubManifest, discoverPaystubLinks, parsePaystubDetail } from '../src/index.js';
 
 const id = '11111111-2222-4333-8444-555555555555';
 const detailUrl = `https://app.gusto.test/payroll_items/${id}/paystub.html?x_role_id=example`;
@@ -30,4 +30,21 @@ test('adds stable suffixes when statements would collide', () => {
 
 test('fails explicitly when the layout is unsupported', () => {
   assert.throws(() => parsePaystubDetail('<main>changed</main>', detailUrl), /Unsupported/);
+});
+
+test('uses an injected Fetch-compatible transport', async () => {
+  const pages = new Map([
+    ['https://app.gusto.test/employee/pay/paystubs?page=1', `<a href="${detailUrl}">Oct 16, 2026</a>`],
+    [detailUrl, `<main>Pay period: Sep 28, 2026 - Oct 11, 2026 Pay Day: Oct 16, 2026 <a href="/payroll_items/${id}/paystub.pdf">Download PDF</a></main>`]
+  ]);
+  const calls = [];
+  const client = new GustoClient({ baseUrl: 'https://app.gusto.test', fetch: async (url, options) => {
+    calls.push({ url: url.toString(), method: options.method });
+    const body = pages.get(url.toString());
+    return { ok: body !== undefined, status: body === undefined ? 404 : 200, text: async () => body };
+  } });
+  const records = await client.discoverFromPaystubPages(['/employee/pay/paystubs?page=1']);
+  const details = await client.readPaystubDetails(records);
+  assert.equal(details[0].payDay, '2026-10-16');
+  assert.deepEqual(calls.map((call) => call.method), ['GET', 'GET']);
 });
