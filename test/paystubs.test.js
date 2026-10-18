@@ -109,3 +109,12 @@ test('rejects invalid dates and a PDF belonging to another paystub', () => {
   assert.throws(() => parsePaystubDetail(html.replace('Feb 28, 2026 – Mar 11', 'Mar 28, 2026 – Mar 11'), detailUrl), /ends before/);
   assert.throws(() => parsePaystubDetail(html.replace(`/payroll_items/${id}/paystub.pdf`, '/payroll_items/aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee/paystub.pdf'), detailUrl), /identity mismatch/);
 });
+
+test('reads reimbursement column labels declared on responsive table cells', () => {
+  const html = `<main>Pay period: Sep 28, 2026 - Oct 11, 2026 Pay Day: Oct 16, 2026
+  <table><tr><th colspan="3">Summary</th></tr>
+  <tr><td data-title="Description" class="text-left"><a href="#" class="tip" data-toggle="tooltip" title data-original-title="The total non-taxable expense reimbursements.">Total Reimbursements</a></td><td data-title="Current">$0.00</td><td data-title="Year To Date">$7,515.32</td></tr></table>
+  <a href="/payroll_items/${id}/paystub.pdf">Download PDF</a></main>`;
+  assert.deepEqual(parsePaystubDetail(html, detailUrl).reimbursements, { current: '0.00', yearToDate: '7515.32' });
+  assert.throws(() => parsePaystubDetail(html.replace('data-title="Current"', 'data-title="Year To Date"'), detailUrl), /columns/);
+});

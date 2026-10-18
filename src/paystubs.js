@@ -72,7 +72,9 @@ export function parsePaystubDetail(html, detailUrl) {
   $('tr').each((_, row) => {
     const cells = $(row).find('th,td').toArray().map((cell) => $(cell).text().trim());
     if (!/^Total Reimbursements$/i.test(cells[0] ?? '')) return;
-    const headers = $(row).closest('table').find('tr').first().find('th,td').toArray().map((cell) => $(cell).text().replace(/\s+/g, ' ').trim());
+    const rowCells = $(row).find('th,td').toArray();
+    const declaredHeaders = rowCells.map((cell) => ($(cell).attr('data-title') ?? '').replace(/\s+/g, ' ').trim());
+    const headers = declaredHeaders.some(Boolean) ? declaredHeaders : $(row).closest('table').find('tr').first().find('th,td').toArray().map((cell) => $(cell).text().replace(/\s+/g, ' ').trim());
     if (!/^Current$/i.test(headers[1] ?? '') || !/^Year To Date$/i.test(headers[2] ?? '')) throw new Error('Unsupported Gusto reimbursement columns');
     const amounts = cells.slice(1).map((value) => value.replace(/[$,\s]/g, ''));
     if (amounts.length !== 2 || amounts.some((value) => !/^-?\d+\.\d{2}$/.test(value))) throw new Error('Unsupported Gusto reimbursement summary');
