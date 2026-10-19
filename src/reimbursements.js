@@ -5,7 +5,7 @@ const REIMBURSEMENT_QUERY = `query MemberExpenses($after: String, $first: Int) {
     expenses {
       expenses(after: $after, first: $first, filter: {}, order: "-created_at") {
         nodes {
-          id amount approvedBy categoryName checkDate createdAt currency
+          id amount approvedBy categoryName categoryUuid checkDate createdAt currency
           description displayName purchaseDate status statusReason
           member { id }
           receipt { id contentType name }
@@ -93,6 +93,7 @@ function normalizeRecord(node, memberId) {
     checkDate: date(node.checkDate, 'check date', { nullable: true }),
     approvedBy: string(node.approvedBy, 'approver', { nullable: true }),
     categoryName: string(node.categoryName, 'category', { nullable: true }),
+    categoryUuid: string(node.categoryUuid, 'category ID', { nullable: true }),
     displayName: string(node.displayName, 'display name', { nullable: true }),
     description: typeof node.description === 'string' ? node.description : null,
     vendor: node.vendor == null ? null : {

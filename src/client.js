@@ -1,11 +1,13 @@
 import { discoverPaystubLinks, normalizePaystubRecords, parsePaystubDetail } from './paystubs.js';
 import { buildReimbursementRequest, collectReimbursements } from './reimbursements.js';
+import { submitReimbursement } from './submissions.js';
 
 export class GustoClient {
-  constructor({ fetch: fetchImpl, baseUrl = 'https://app.gusto.com' }) {
+  constructor({ fetch: fetchImpl, baseUrl = 'https://app.gusto.com', expenseFetch, createExpenseFetch, receiptFetch, createStorageFetch, storageOrigins }) {
     if (typeof fetchImpl !== 'function') throw new Error('A Fetch-compatible transport is required');
     this.fetch = fetchImpl;
     this.baseUrl = baseUrl;
+    this.submissionTransports = { expenseFetch, createExpenseFetch, receiptFetch, createStorageFetch, storageOrigins };
   }
 
   async getText(url) {
@@ -82,5 +84,10 @@ export class GustoClient {
       if (response.url && /\/(?:login|sign_in|signin)(?:\/|$)/i.test(new URL(response.url).pathname)) throw new Error('Gusto authentication required');
       return response.json();
     }, { expectedCount, maxPages, memberId });
+  }
+
+  async submitReimbursement(input, { receipt } = {}) {
+    return submitReimbursement(input, { ...this.submissionTransports, receipt,
+      readReimbursements: () => this.listReimbursements({ memberId: input.companyMemberId }) });
   }
 }
