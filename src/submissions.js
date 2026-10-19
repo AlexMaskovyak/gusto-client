@@ -127,7 +127,11 @@ export async function uploadReimbursementReceipt(receipt, { receiptFetch, create
   let request;
   try { request = storageRequest(metadata, prepared, storageOrigins); }
   catch { throw new GustoSubmissionError('receipt-metadata', 'unknown'); }
-  const fetch = createStorageFetch({ origin: new URL(request.url).origin, authorizeWrite: createReceiptStorageGuard(request) });
+  let fetch;
+  try {
+    fetch = createStorageFetch({ origin: new URL(request.url).origin, authorizeWrite: createReceiptStorageGuard(request) });
+    if (typeof fetch !== 'function') fail('Invalid storage transport');
+  } catch { throw new GustoSubmissionError('receipt-upload', 'not-sent'); }
   await write(fetch, request, 'receipt-upload', { json: false });
   return { fileId: metadata.signed_id, filename: prepared.filename, sha256: prepared.sha256 };
 }
@@ -142,13 +146,19 @@ export async function submitReimbursement(input, { expenseFetch, createExpenseFe
   if ((typeof expenseFetch !== 'function' && typeof createExpenseFetch !== 'function') || typeof readReimbursements !== 'function') fail('Explicit expense write and read-back transports are required');
   if (receipt && approved.fileId) fail('Supply receipt bytes or an existing uploaded receipt ID, not both');
   if (receipt) prepareReceiptUpload(receipt);
-  const before = await readReimbursements();
+  let before;
+  try { before = await readReimbursements(); }
+  catch { throw new GustoSubmissionError('preflight', 'not-sent'); }
   if (before.complete !== true || before.memberId !== approved.companyMemberId) fail('Complete matching employee reimbursement inventory required');
   if (before.records.some((record) => matches(record, approved))) fail('Possible duplicate reimbursement; reconcile before submitting');
   const uploaded = receipt ? await uploadReimbursementReceipt(receipt, { receiptFetch, createStorageFetch, storageOrigins }) : null;
   const submitted = uploaded ? { ...approved, fileId: uploaded.fileId } : approved;
   const request = buildCreateReimbursementRequest(submitted);
-  const fetch = createExpenseFetch ? createExpenseFetch({ origin: new URL(request.url).origin, authorizeWrite: createReimbursementSubmissionGuard(submitted) }) : expenseFetch;
+  let fetch;
+  try {
+    fetch = createExpenseFetch ? createExpenseFetch({ origin: new URL(request.url).origin, authorizeWrite: createReimbursementSubmissionGuard(submitted) }) : expenseFetch;
+    if (typeof fetch !== 'function') fail('Invalid expense transport');
+  } catch { throw new GustoSubmissionError('expense-create', 'not-sent'); }
   const payload = await write(fetch, request, 'expense-create');
   if (payload?.errors?.length || !Array.isArray(payload?.data?.payload?.errors)) throw new GustoSubmissionError('expense-create', 'unknown');
   if (payload.data.payload.errors.length > 0) throw new GustoSubmissionError('expense-create', 'rejected');
@@ -161,7 +171,7 @@ export async function submitReimbursement(input, { expenseFetch, createExpenseFe
   try {
     const after = await readReimbursements();
     const verified = after.records.filter((record) => record.id === created.id);
-    if (after.complete !== true || after.memberId !== approved.companyMemberId || verified.length !== 1 || !matches(verified[0], approved) || verified[0].categoryUuid !== approved.categoryUuid || (submitted.fileId && verified[0].receipt?.id !== created.receipt?.id)) fail('Read-back mismatch');
+    if (after.complete !== true || after.memberId !== approved.companyMemberId || verified.length !== 1 || !matches(verified[0], approved) || verified[0].categoryUuid !== approved.categoryUuid || (submitted.fileId && verified[0].receipt?.id !== created.receipt?.id) || (approved.expenseVendor?.id && verified[0].vendor?.id !== approved.expenseVendor.id) || (approved.expenseVendor?.name && verified[0].vendor?.name !== approved.expenseVendor.name)) fail('Read-back mismatch');
     return { expense: verified[0], submissionVerified: true, paymentVerified: false, unverifiedFields: verified[0].currency === null ? ['currency'] : [], receipt: uploaded ? { filename: uploaded.filename, sha256: uploaded.sha256 } : null };
   } catch { throw new GustoSubmissionError('verification', 'created-unverified', created.id); }
 }

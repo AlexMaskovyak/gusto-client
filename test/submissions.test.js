@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { prepareReimbursementSubmission, buildCreateReimbursementRequest, createReimbursementSubmissionGuard, prepareReceiptUpload, buildReceiptUploadRequest, createReceiptUploadGuard, createReceiptStorageGuard, uploadReimbursementReceipt, submitReimbursement, GustoClient } from '../src/index.js';
+import { prepareReimbursementSubmission, buildCreateReimbursementRequest, createReimbursementSubmissionGuard, prepareReceiptUpload, buildReceiptUploadRequest, createReceiptUploadGuard, createReceiptStorageGuard, uploadReimbursementReceipt, submitReimbursement, GustoClient, buildReimbursementOptionsRequest, isReadOnlyReimbursementRequest } from '../src/index.js';
 
 const input = { amount:'23.81', categoryUuid:'example-category', companyMemberId:'example-member', currency:'USD', description:'Example expense', purchaseDate:'2026-03-10', expenseVendor:{name:'Example merchant'} };
 const receipt = {filename:'receipt.pdf',contentType:'application/pdf',bytes:Buffer.from('%PDF-1.7\nsynthetic receipt')};
@@ -82,4 +82,13 @@ test('uploads before creating and scopes the final create guard to the signed re
 test('existing read clients cannot silently gain submission permissions', async () => {
   const client=new GustoClient({fetch:()=>assert.fail('Read transport used for a mutation')});
   await assert.rejects(client.submitReimbursement(input),/Explicit expense write/);
+});
+test('discovers the current member and category IDs through a separately guarded read', async () => {
+  assert.equal(isReadOnlyReimbursementRequest(buildReimbursementOptionsRequest()),true);
+  const client=new GustoClient({fetch:async(url,init)=>{assert.equal(isReadOnlyReimbursementRequest({url,body:init.body}),true);return Response.json({data:{member:{id:'member',expenses:{categories:[{id:'category',name:'Travel',isDisabled:false,rates:{nodes:[]}}]}}}});}});
+  assert.deepEqual(await client.listReimbursementOptions(),{memberId:'member',categories:[{id:'category',name:'Travel',isDisabled:false,rates:[]}]});
+});
+test('transport factories and preflight readers cannot disclose credentials in thrown errors', async () => {
+  await assert.rejects(submitReimbursement(input,{expenseFetch:success,readReimbursements:async()=>{throw Error('private-token');}}),{phase:'preflight',outcome:'not-sent'});
+  await assert.rejects(submitReimbursement(input,{createExpenseFetch:()=>{throw Error('private-token');},readReimbursements:async()=>inventory()}),{phase:'expense-create',outcome:'not-sent'});
 });

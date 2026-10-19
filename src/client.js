@@ -1,5 +1,5 @@
 import { discoverPaystubLinks, normalizePaystubRecords, parsePaystubDetail } from './paystubs.js';
-import { buildReimbursementRequest, collectReimbursements } from './reimbursements.js';
+import { buildReimbursementRequest, collectReimbursements, buildReimbursementOptionsRequest, parseReimbursementOptions } from './reimbursements.js';
 import { submitReimbursement } from './submissions.js';
 
 export class GustoClient {
@@ -89,5 +89,16 @@ export class GustoClient {
   async submitReimbursement(input, { receipt } = {}) {
     return submitReimbursement(input, { ...this.submissionTransports, receipt,
       readReimbursements: () => this.listReimbursements({ memberId: input.companyMemberId }) });
+  }
+
+  async listReimbursementOptions() {
+    const { url, ...options } = buildReimbursementOptionsRequest();
+    let payload;
+    try {
+      const response = await this.fetch(url, options);
+      if (!response.ok) throw new Error('Options unavailable');
+      payload = await response.json();
+    } catch { throw new Error('Gusto reimbursement options request failed'); }
+    return parseReimbursementOptions(payload);
   }
 }

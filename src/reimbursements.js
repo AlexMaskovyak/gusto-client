@@ -1,4 +1,29 @@
 const REIMBURSEMENT_ENDPOINT = 'https://graphql.app.gusto.com/?operationName=MemberExpenses';
+const OPTIONS_ENDPOINT = 'https://graphql.app.gusto.com/?operationName=ReimbursementOptions';
+const OPTIONS_QUERY = `query ReimbursementOptions {
+  member { id expenses { categories { id name isDisabled rates { nodes { id name isActive rateBaseKind rateConversionAmount } } } } }
+}`;
+
+export function buildReimbursementOptionsRequest() {
+  return { url: OPTIONS_ENDPOINT, method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ operationName: 'ReimbursementOptions', query: OPTIONS_QUERY, variables: {} }) };
+}
+
+export function parseReimbursementOptions(payload) {
+  if (!payload || (payload.errors != null && (!Array.isArray(payload.errors) || payload.errors.length))) throw new Error('Gusto reimbursement options query returned errors');
+  const member = object(payload.data?.member, 'Missing reimbursement member');
+  const memberId = string(member.id, 'member ID');
+  if (!Array.isArray(member.expenses?.categories)) throw new Error('Missing reimbursement categories');
+  const categories = member.expenses.categories.map((category) => {
+    if (typeof category.isDisabled !== 'boolean') throw new Error('Invalid reimbursement category state');
+    return { id: string(category.id, 'category ID'), name: string(category.name, 'category name'), isDisabled: category.isDisabled,
+      rates: (category.rates?.nodes ?? []).map((rate) => {
+        if (typeof rate.isActive !== 'boolean') throw new Error('Invalid reimbursement rate state');
+        return { id: string(rate.id, 'rate ID'), name: string(rate.name, 'rate name'), isActive: rate.isActive, rateBaseKind: string(rate.rateBaseKind, 'rate unit'), rateConversionAmount: string(rate.rateConversionAmount, 'rate conversion') };
+      }) };
+  });
+  if (new Set(categories.map((c) => c.id)).size !== categories.length) throw new Error('Duplicate reimbursement category ID');
+  return { memberId, categories };
+}
 const REIMBURSEMENT_QUERY = `query MemberExpenses($after: String, $first: Int) {
   member {
     id
@@ -32,6 +57,7 @@ export function buildReimbursementRequest({ first = 100, after = null } = {}) {
 /** Restrict an authenticated POST transport to the fixed read-only query. */
 export function isReadOnlyReimbursementRequest({ url, body } = {}) {
   try {
+    if (String(url) === OPTIONS_ENDPOINT && body === buildReimbursementOptionsRequest().body) return true;
     if (new URL(url).href !== REIMBURSEMENT_ENDPOINT || typeof body !== 'string') return false;
     const request = JSON.parse(body);
     if (!request || Object.keys(request).sort().join(',') !== 'operationName,query,variables' ||
