@@ -1,5 +1,13 @@
 # Plan
 
+## Reimbursement submission
+
+- [ ] Inspect the authenticated employee submission form and discover its receipt-upload and expense-create contracts without submitting a real expense.
+- [ ] Add validated submission preparation and a separately enabled write transport; test exact requests, receipt handling, identity, error redaction, and uncertain outcomes.
+- [ ] Document the API, mutation boundary, retry/recovery behavior, and verification limits; run the full suite and commit coherent changes.
+
+Gusto remains the system of record for submitted expenses. The caller owns approved expense data, receipt bytes, authentication, and the operational ledger. This library owns request validation and service response handling. Reads must not gain mutation privileges implicitly. Upload and expense creation are distinct side effects; a successful upload is not submission. Never automatically retry an uncertain create. Reconcile the returned expense identity against a fresh read before marking a submission complete. Live submission testing requires separate authorization; synthetic tests do not establish live write compatibility.
+
 ## Reimbursements
 
 - [x] Discover the authenticated expense query, filters, cursor arguments, and count from the live browser; prove one client request before bulk collection.
