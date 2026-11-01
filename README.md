@@ -14,6 +14,13 @@ poetry run gusto-client --help
 poetry run gusto-client MemberExpenses --help
 ```
 
+Generated Python methods also include docstrings for declared inputs, omission,
+write permission, return values and failures. Inspect one locally with:
+
+```sh
+poetry run python -c 'from gusto_client import Client; help(Client.create_member_expense)'
+```
+
 Help is local and sends no requests. It lists declared GraphQL variables,
 required inputs, optional omissions, and whether each operation reads or writes.
 
