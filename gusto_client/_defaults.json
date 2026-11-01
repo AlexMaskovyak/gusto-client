@@ -1,0 +1,9 @@
+{
+  "url": "https://graphql.app.gusto.com/",
+  "loginUrl": "https://app.gusto.com/payroll_admin/expenses/team",
+  "sessionHeaders": [
+    "apollographql-client-name",
+    "apollographql-client-version",
+    "x-role-id"
+  ]
+}

@@ -1,86 +1,71 @@
-# Gusto Client
+# gusto-client
 
-Python methods and endpoint commands generated from captured GraphQL operations.
-A complete server schema is optional. The current set has 16 operations, including
-`MemberExpenses`, `ReimbursementOptions` and `CreateMemberExpense`.
+Python methods and CLI commands generated from 16 captured GraphQL operations.
+The generator produced every file in this project. No service-specific source
+patches are needed. This operation set does not imply coverage of every service API.
 
 ## Install and inspect
 
-Use Python 3.11 or newer and Poetry 2.2 or newer. From this repository:
-
-```sh
-poetry install
-poetry run gusto-client --help
-poetry run gusto-client MemberExpenses --help
-```
-
-Generated Python methods also include docstrings for declared inputs, omission,
-write permission, return values and failures. Inspect one locally with:
-
-```sh
-poetry run python -c 'from gusto_client import Client; help(Client.create_member_expense)'
-```
-
-Help is local and sends no requests. It lists declared GraphQL variables,
-required inputs, optional omissions, and whether each operation reads or writes.
-
-## Read reimbursement options
-
-This command opens a temporary Chrome window and sends one read request:
-
-```sh
-mkdir -p .private
-poetry run gusto-client ReimbursementOptions \
-  --url https://graphql.app.gusto.com/ \
-  --login --login-url https://app.gusto.com/payroll_admin/expenses/team \
-  --session-header apollographql-client-name \
-  --session-header apollographql-client-version \
-  --session-header x-role-id \
-  --output .private/options.json
-```
-
-Sign in, open Expenses and wait for it to load, then press Enter in the terminal.
-The three `--session-header` flags name headers sent by Gusto's page. Their values
-are collected from your live session and held in memory; do not supply tokens.
-Gusto can return HTTP 403 when the Apollo identification headers are missing. The browser closes
-after the request. Each invocation requires a fresh sign-in. Existing output
-files are refused; choose a new name on subsequent runs. Authentication and
-account values are runtime inputs and are never embedded in the package.
-
-For `MemberExpenses`, put the desired variables in a JSON file, for example
-`{"first":100}`, and supply its path with `--input`. One invocation returns one
-API response; callers control cursor pagination and completeness checks.
-
-## Writes and validation
-
-The CLI requires `--confirm-write CreateMemberExpense` for that mutation.
-Python callers must construct `Client(..., allow_writes=True)` to enable mutation
-methods. The library never retries a request automatically. Reconcile Gusto
-before retrying an uncertain submission.
-
-Variable names, nullability, list constraints and standard scalar types are
-validated. Custom input fields and response shapes remain JSON without a schema.
-These methods send individual API requests. Receipt upload, duplicate checks,
-submission read-back, payment reconciliation and paystub downloads are separate
-workflows; the generated operation set does not implement them automatically.
-
-## Generation and tests
-
-Source documents are in `operations/`. `generation.json` records their hashes,
-the shared generator version and schema-validation status. The shared
-[browser-sourced API client generator](https://github.com/AlexMaskovyak/browser-sourced-api-client-generator)
-produced the Python code; this package has no dependency on that generator.
+Use Python 3.11 or newer, Poetry 2.2 or newer and installed Chrome for browser login.
+From this generated directory:
 
 ```sh
 poetry install --with dev
+poetry run gusto-client --help
+poetry run gusto-client CofounderAnnouncementBarCurrentUserRole --help
 poetry run pytest -q
 poetry build
 ```
 
-A read of `ReimbursementOptions` through the generated Python client and shared
-browser transport returned HTTP 200 and ten categories on 2026-11-01 with these
-session headers. This verifies that read only. Live mutations remain unverified.
+Installation may download dependencies. Help, tests and package builds send no
+service requests. Tests use synthetic responses; they do not prove live compatibility.
 
-Tests use synthetic data and do not submit live expenses. Generating a method or
-passing a local test does not establish current Gusto compatibility. The existing
-[JavaScript compatibility API](docs/javascript-client.md) remains available.
+## Call an operation
+
+The configured endpoint is `https://graphql.app.gusto.com/`. With an interactive terminal:
+
+```sh
+poetry run gusto-client CofounderAnnouncementBarCurrentUserRole --login
+```
+
+This opens `https://app.gusto.com/payroll_admin/expenses/team`. Sign in, open the relevant application page and
+wait for it to load, then press Enter in the terminal. The command sends one read
+and prints JSON. Use `--output NEW_FILE` to save a private result. Existing files
+are refused. Each invocation opens a fresh login; the browser closes afterward.
+
+Configured additional session-header names: apollographql-client-name, apollographql-client-version, x-role-id.
+Their values are observed in memory at the API origin. Never put tokens in source
+files or command arguments. Missing required headers can cause HTTP 403. Inspect
+the application request and update `client-project.json` if its contract changes.
+
+For operations with variables, create a JSON object using the names/types in that
+operation's help and pass `--input FILE`. Mutation commands require
+`--confirm-write OPERATION` with the exact operation name. Python mutations require
+`Client(..., allow_writes=True)`. No automatic retries occur. Check the service before
+retrying an uncertain write. Receipt uploads, pagination and other multi-step
+workflows require their own captured operations and orchestration.
+
+## Reproduce this project
+
+`inputs/manifest.json` contains the selected operation documents and request
+conventions. `client-project.json` supplies public endpoint/login configuration
+and header names. No saved login or account values are needed to build.
+Using an installed compatible generator, from this directory:
+
+```sh
+website-client build --project client-project.json --output ../gusto-client-rebuilt
+```
+
+The output directory must not exist and its parent must exist. The command reads
+local inputs, generates code, documentation and tests, and validates an included
+Poetry lock. It does not call the service. Compare outputs before replacing an
+existing project. Reuse the same generator revision and lock for reproducibility.
+
+## Validation and ownership
+
+Generated method docstrings describe declared inputs, omission versus null, write
+permission, results and failures. Standard scalar types are validated; custom
+input fields and response shapes remain JSON without a complete server schema.
+The service remains authoritative for its records. Generation and
+synthetic tests do not verify submissions or payment. HTTP failures report status
+without response bodies. Authentication stays in browser/process memory.
