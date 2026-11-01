@@ -23,7 +23,11 @@ Partial GraphQL errors fail rather than claiming a successful result. If a write
 may have reached Gusto, check Gusto before retrying.
 
 Authentication stays in the temporary browser or process memory. Fresh commands
-require fresh authentication. Local tests use synthetic responses; current service
+require fresh authentication. Gusto's Apollo client identification headers and
+role header are selected by name in the README command, then observed at the exact
+API origin. Their values remain in memory. HTTP rejections expose status codes,
+not private response bodies. A caller sharing a browser session retains ownership
+of that session when the request transport closes. Local tests use synthetic responses; current service
 compatibility requires an authenticated read, and writes require separate live
 verification. The operation set does not automatically implement receipt upload
 or payment reconciliation.

@@ -23,10 +23,19 @@ This command opens a temporary Chrome window and sends one read request:
 
 ```sh
 mkdir -p .private
-poetry run gusto-client ReimbursementOptions --url https://graphql.app.gusto.com/ --login --login-url https://app.gusto.com --output .private/options.json
+poetry run gusto-client ReimbursementOptions \
+  --url https://graphql.app.gusto.com/ \
+  --login --login-url https://app.gusto.com/payroll_admin/expenses/team \
+  --session-header apollographql-client-name \
+  --session-header apollographql-client-version \
+  --session-header x-role-id \
+  --output .private/options.json
 ```
 
-Sign in, open Expenses, then press Enter in the terminal. The browser closes
+Sign in, open Expenses and wait for it to load, then press Enter in the terminal.
+The three `--session-header` flags name headers sent by Gusto's page. Their values
+are collected from your live session and held in memory; do not supply tokens.
+Gusto can return HTTP 403 when the Apollo identification headers are missing. The browser closes
 after the request. Each invocation requires a fresh sign-in. Existing output
 files are refused; choose a new name on subsequent runs. Authentication and
 account values are runtime inputs and are never embedded in the package.
@@ -60,6 +69,10 @@ poetry install --with dev
 poetry run pytest -q
 poetry build
 ```
+
+A read of `ReimbursementOptions` through the generated Python client and shared
+browser transport returned HTTP 200 and ten categories on 2026-11-01 with these
+session headers. This verifies that read only. Live mutations remain unverified.
 
 Tests use synthetic data and do not submit live expenses. Generating a method or
 passing a local test does not establish current Gusto compatibility. The existing
