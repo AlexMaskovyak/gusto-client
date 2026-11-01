@@ -1,0 +1,32 @@
+query DashboardApisUseCurrentCompanySubscriptions {
+  company {
+    ...DashboardApisUseCurrentCompanySubscriptionsFields
+    __typename
+  }
+}
+
+fragment DashboardApisUseCurrentCompanySubscriptionsFields on Company {
+  id
+  subscriptions {
+    edges {
+      node {
+        id
+        name
+        product {
+          id
+          marketingProduct {
+            name
+            __typename
+          }
+          namespace
+          productFamilies
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

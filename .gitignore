@@ -5,4 +5,9 @@ coverage/
 manifests/
 staging/
 results.json
-
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+dist/
+.private/

@@ -1,0 +1,18 @@
+query UseAdminOverrideRedirect {
+  company {
+    id
+    companyOnboardingMigration {
+      id
+      migrationState
+      migrationType
+      __typename
+    }
+    __typename
+  }
+  payrollAdmin {
+    id
+    currentRoleNeedsSelfOnboarding
+    currentRoleNeedsSelfOnboardingWelcome
+    __typename
+  }
+}

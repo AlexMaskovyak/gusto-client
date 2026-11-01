@@ -1,0 +1,257 @@
+{
+  "CofounderAnnouncementBarCurrentUserRole": {
+    "kind": "graphql-operation",
+    "method": "cofounder_announcement_bar_current_user_role",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query CofounderAnnouncementBarCurrentUserRole {\n  currentUserRole {\n    id\n    cowork {\n      ...CofounderAnnouncementBarCowork\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment CofounderAnnouncementBarCowork on Cowork {\n  id\n  segmentation {\n    id\n    accountingConnection\n    workforce\n    __typename\n  }\n  settings {\n    id\n    onboardingStatus\n    __typename\n  }\n  __typename\n}\n",
+    "variables": [],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "CompanyHasBecomePayingCustomer": {
+    "kind": "graphql-operation",
+    "method": "company_has_become_paying_customer",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query CompanyHasBecomePayingCustomer($readBasicCompanyInfoPermission: Boolean!) {\n  company {\n    id\n    hasBecomePayingCustomer @include(if: $readBasicCompanyInfoPermission)\n    __typename\n  }\n}\n",
+    "variables": [
+      {
+        "name": "readBasicCompanyInfoPermission",
+        "parameter": "readBasicCompanyInfoPermission",
+        "type": "Boolean!",
+        "required": true
+      }
+    ],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "CompanyOnboardingAndFromDirectSegment": {
+    "kind": "graphql-operation",
+    "method": "company_onboarding_and_from_direct_segment",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query CompanyOnboardingAndFromDirectSegment {\n  company {\n    ...CompanyOnboardingAndFromDirectSegmentFields\n    __typename\n  }\n}\n\nfragment CompanyOnboardingAndFromDirectSegmentFields on Company {\n  id\n  fromDirectSegment\n  hasBecomePayingCustomer\n  __typename\n}\n",
+    "variables": [],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "CreateMemberExpense": {
+    "kind": "graphql-operation",
+    "method": "create_member_expense",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": true,
+    "document": "mutation CreateMemberExpense($input: CreateMemberExpenseInput!) {\n  payload: createMemberExpense(input: $input) {\n    errors {\n      argument\n      message\n    }\n    oneTimeReimbursement {\n      ...TeamExpense\n    }\n  }\n}\n\nfragment Expense on OneTimeReimbursement {\n  id\n  amount\n  approvedBy\n  categoryName\n  categoryUuid\n  checkDate\n  createdAt\n  currency\n  description\n  displayName\n  eorOneTimeReimbursement {\n    id\n    category\n    title\n  }\n  member {\n    id\n    latestEmployment {\n      id\n      isEor\n      workerType\n    }\n    preferredFullName\n  }\n  purchaseDate\n  rateData {\n    amount\n    categoryRateUuid\n    name\n    rateBaseKind\n    rateConversionAmount\n  }\n  receipt {\n    id\n    contentType\n    name\n    url\n  }\n  status\n  statusReason\n  vendor {\n    id\n    name\n  }\n}\n\nfragment TeamExpense on OneTimeReimbursement {\n  availableActions\n  ...Expense\n}\n",
+    "variables": [
+      {
+        "name": "input",
+        "parameter": "input",
+        "type": "CreateMemberExpenseInput!",
+        "required": true
+      }
+    ],
+    "description": "Captured GraphQL mutation; complete schema not required."
+  },
+  "DashboardApisCompanyIsGusEnabled": {
+    "kind": "graphql-operation",
+    "method": "dashboard_apis_company_is_gus_enabled",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query DashboardApisCompanyIsGusEnabled {\n  company {\n    id\n    isGusEnabled\n    __typename\n  }\n}\n",
+    "variables": [],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "DashboardApisUseCurrentCompanySubscriptions": {
+    "kind": "graphql-operation",
+    "method": "dashboard_apis_use_current_company_subscriptions",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query DashboardApisUseCurrentCompanySubscriptions {\n  company {\n    ...DashboardApisUseCurrentCompanySubscriptionsFields\n    __typename\n  }\n}\n\nfragment DashboardApisUseCurrentCompanySubscriptionsFields on Company {\n  id\n  subscriptions {\n    edges {\n      node {\n        id\n        name\n        product {\n          id\n          marketingProduct {\n            name\n            __typename\n          }\n          namespace\n          productFamilies\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n",
+    "variables": [],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "FirmLogo": {
+    "kind": "graphql-operation",
+    "method": "firm_logo",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query FirmLogo($isAccountant: Boolean!) {\n  accountingFirm @include(if: $isAccountant) {\n    id\n    logoUrl\n    __typename\n  }\n  company @skip(if: $isAccountant) {\n    id\n    managingAccountingFirmLogoUrl\n    __typename\n  }\n}\n",
+    "variables": [
+      {
+        "name": "isAccountant",
+        "parameter": "isAccountant",
+        "type": "Boolean!",
+        "required": true
+      }
+    ],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "GetCurrentCompanyOnboardingExperienceType": {
+    "kind": "graphql-operation",
+    "method": "get_current_company_onboarding_experience_type",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query GetCurrentCompanyOnboardingExperienceType {\n  company {\n    id\n    companyOnboardingCurrentExperienceType\n    hasAccountingFirm\n    isOnboarding\n    ...OnboardingAdvisorCustomerType\n    __typename\n  }\n  currentUser {\n    id\n    accountant {\n      id\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment OnboardingAdvisorCustomerType on Company {\n  id\n  companyProfileAndIntent {\n    id\n    newToRunningPayroll\n    __typename\n  }\n  __typename\n}\n",
+    "variables": [],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "GustoFfe": {
+    "kind": "graphql-operation",
+    "method": "gusto_ffe",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query GustoFfe($input: [GustoFfeFeatureInput!]!) {\n  gustoFfeFeatures(input: $input) {\n    ...GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields\n    __typename\n  }\n}\n\nfragment GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields on GustoFfeFeatureResult {\n  __typename\n  entityId\n  entityType\n  featureFlagKey\n  featureVariables {\n    __typename\n    ... on StringFeatureVariable {\n      stringVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on IntFeatureVariable {\n      intVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on FloatFeatureVariable {\n      floatVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on BooleanFeatureVariable {\n      booleanVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on JsonFeatureVariable {\n      jsonVariableValue: variableValue\n      variableKey\n      __typename\n    }\n  }\n  isFeatureEnabled\n  projectEntity\n  variationName\n}\n",
+    "variables": [
+      {
+        "name": "input",
+        "parameter": "input",
+        "type": "[GustoFfeFeatureInput!]!",
+        "required": true
+      }
+    ],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "MemberExpenses": {
+    "kind": "graphql-operation",
+    "method": "member_expenses",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query MemberExpenses($after: String, $first: Int) {\n  member {\n    id\n    expenses {\n      expenses(after: $after, first: $first, filter: {}, order: \"-created_at\") {\n        nodes {\n          id\n          amount\n          approvedBy\n          categoryName\n          categoryUuid\n          checkDate\n          createdAt\n          currency\n          description\n          displayName\n          purchaseDate\n          status\n          statusReason\n          member {\n            id\n          }\n          receipt {\n            id\n            contentType\n            name\n          }\n          vendor {\n            id\n            name\n          }\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n        }\n      }\n    }\n  }\n}\n",
+    "variables": [
+      {
+        "name": "after",
+        "parameter": "after",
+        "type": "String",
+        "required": false
+      },
+      {
+        "name": "first",
+        "parameter": "first",
+        "type": "Int",
+        "required": false
+      }
+    ],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "MobileAppGrowthUpsell": {
+    "kind": "graphql-operation",
+    "method": "mobile_app_growth_upsell",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query MobileAppGrowthUpsell {\n  mobileAppGrowthUpsell {\n    id\n    __typename\n    platform\n  }\n}\n",
+    "variables": [],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "ReferralsNavLinkContainer": {
+    "kind": "graphql-operation",
+    "method": "referrals_nav_link_container",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query ReferralsNavLinkContainer {\n  currentUser {\n    id\n    referralRewards {\n      id\n      isPromotional\n      maxReferrerDollarAmount\n      referrerRewardType\n      __typename\n    }\n    referrals {\n      id\n      unreadReferralsCount\n      __typename\n    }\n    __typename\n  }\n}\n",
+    "variables": [],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "ReimbursementOptions": {
+    "kind": "graphql-operation",
+    "method": "reimbursement_options",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query ReimbursementOptions {\n  member {\n    id\n    expenses {\n      categories {\n        id\n        name\n        isDisabled\n        rates {\n          nodes {\n            id\n            name\n            isActive\n            rateBaseKind\n            rateConversionAmount\n          }\n        }\n      }\n    }\n  }\n}\n",
+    "variables": [],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "SupportPage": {
+    "kind": "graphql-operation",
+    "method": "support_page",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query SupportPage($canReadCompanyAddresses: Boolean!, $companyId: ID!, $featureFlagInputs: [GustoFfeFeatureInput!]!, $isAccountant: Boolean!, $isPayrollAdmin: Boolean!) {\n  accountant @include(if: $isAccountant) {\n    id\n    accountingFirm {\n      id\n      partnerProgramInfo {\n        currentLevel\n        discountedClientsCount\n        __typename\n      }\n      phone\n      __typename\n    }\n    email\n    firstName\n    lastName\n    phone\n    __typename\n  }\n  company {\n    id\n    dedicatedSupportContact @include(if: $isPayrollAdmin) {\n      id\n      __typename\n    }\n    dsaChatEnabled @include(if: $isPayrollAdmin)\n    filingAddress @include(if: $canReadCompanyAddresses) {\n      id\n      state\n      __typename\n    }\n    fractionalHrPartners @include(if: $isPayrollAdmin) {\n      id\n      email\n      name\n      __typename\n    }\n    hasRunPayroll @include(if: $isPayrollAdmin)\n    isApproved\n    isEmbeddedPayrollCompany\n    isOnboarding\n    isSuspended\n    premiumFreeTrialStatus @include(if: $isPayrollAdmin) {\n      daysRemaining\n      onTrial\n      __typename\n    }\n    __typename\n  }\n  currentUser @include(if: $isPayrollAdmin) {\n    id\n    isHrSupportCenterUser(companyId: $companyId)\n    __typename\n  }\n  currentUserRole @include(if: $isPayrollAdmin) {\n    id\n    phone\n    __typename\n  }\n  employee {\n    id\n    nextPayDay\n    __typename\n  }\n  gustoFfeFeatures(input: $featureFlagInputs) {\n    ...GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields\n    __typename\n  }\n  member {\n    id\n    currentHomeLocation {\n      id\n      country\n      __typename\n    }\n    currentWorkLocation {\n      id\n      country\n      __typename\n    }\n    __typename\n  }\n  supportInfo {\n    id\n    emailRestrictionEnabled\n    miawIdentityToken\n    phoneNumber\n    prioritySupport\n    ...DefaultQuickActions\n    ...HoopData\n    ...SearchOptions\n    ...TechnicalAccountManager\n    __typename\n  }\n}\n\nfragment DefaultQuickActions on SupportInfo {\n  defaultQuickActions {\n    chatSkill\n    href\n    keywords\n    phoneSkill\n    tagIconType\n    tagText\n    title\n    __typename\n  }\n  __typename\n}\n\nfragment GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields on GustoFfeFeatureResult {\n  __typename\n  entityId\n  entityType\n  featureFlagKey\n  featureVariables {\n    __typename\n    ... on StringFeatureVariable {\n      stringVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on IntFeatureVariable {\n      intVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on FloatFeatureVariable {\n      floatVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on BooleanFeatureVariable {\n      booleanVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on JsonFeatureVariable {\n      jsonVariableValue: variableValue\n      variableKey\n      __typename\n    }\n  }\n  isFeatureEnabled\n  projectEntity\n  variationName\n}\n\nfragment HoopData on SupportInfo {\n  id\n  closures {\n    channelName\n    daysClosed\n    endAt\n    eventTitle\n    returnAt\n    startAt\n    teamName\n    __typename\n  }\n  hoop {\n    channel\n    supportTeam\n    weeklyHours {\n      closeAt\n      isClosed\n      isHoliday\n      openAt\n      weekdayIndex\n      __typename\n    }\n    __typename\n  }\n  nextAvailableHoop\n  supportTeamForUserRole\n  __typename\n}\n\nfragment SearchOptions on SupportInfo {\n  searchOptions {\n    popularSearchOptions {\n      label\n      value\n      __typename\n    }\n    suggestedSearchOptions {\n      label\n      value\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment TechnicalAccountManager on SupportInfo {\n  dsaAvailableForLiveChat\n  salesAccountManager {\n    email\n    firstName\n    lastName\n    phoneExtension\n    salesforceAccountId\n    salesforceResellerAccountId\n    __typename\n  }\n  technicalAccountManager {\n    email\n    firstName\n    lastName\n    phoneExtension\n    salesforceAccountId\n    salesforceResellerAccountId\n    __typename\n  }\n  __typename\n}\n",
+    "variables": [
+      {
+        "name": "canReadCompanyAddresses",
+        "parameter": "canReadCompanyAddresses",
+        "type": "Boolean!",
+        "required": true
+      },
+      {
+        "name": "companyId",
+        "parameter": "companyId",
+        "type": "ID!",
+        "required": true
+      },
+      {
+        "name": "featureFlagInputs",
+        "parameter": "featureFlagInputs",
+        "type": "[GustoFfeFeatureInput!]!",
+        "required": true
+      },
+      {
+        "name": "isAccountant",
+        "parameter": "isAccountant",
+        "type": "Boolean!",
+        "required": true
+      },
+      {
+        "name": "isPayrollAdmin",
+        "parameter": "isPayrollAdmin",
+        "type": "Boolean!",
+        "required": true
+      }
+    ],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "TopBarCompany": {
+    "kind": "graphql-operation",
+    "method": "top_bar_company",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query TopBarCompany($isPayrollAdmin: Boolean!) {\n  company {\n    id\n    shouldShowBenefitsMaintenance\n    __typename\n  }\n  currentUser {\n    id\n    accountant @include(if: $isPayrollAdmin) {\n      id\n      __typename\n    }\n    __typename\n  }\n}\n",
+    "variables": [
+      {
+        "name": "isPayrollAdmin",
+        "parameter": "isPayrollAdmin",
+        "type": "Boolean!",
+        "required": true
+      }
+    ],
+    "description": "Captured GraphQL query; complete schema not required."
+  },
+  "UseAdminOverrideRedirect": {
+    "kind": "graphql-operation",
+    "method": "use_admin_override_redirect",
+    "httpMethod": "POST",
+    "operationNameInUrl": true,
+    "requestStyleObserved": true,
+    "write": false,
+    "document": "query UseAdminOverrideRedirect {\n  company {\n    id\n    companyOnboardingMigration {\n      id\n      migrationState\n      migrationType\n      __typename\n    }\n    __typename\n  }\n  payrollAdmin {\n    id\n    currentRoleNeedsSelfOnboarding\n    currentRoleNeedsSelfOnboardingWelcome\n    __typename\n  }\n}\n",
+    "variables": [],
+    "description": "Captured GraphQL query; complete schema not required."
+  }
+}

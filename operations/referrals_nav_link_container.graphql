@@ -1,0 +1,18 @@
+query ReferralsNavLinkContainer {
+  currentUser {
+    id
+    referralRewards {
+      id
+      isPromotional
+      maxReferrerDollarAmount
+      referrerRewardType
+      __typename
+    }
+    referrals {
+      id
+      unreadReferralsCount
+      __typename
+    }
+    __typename
+  }
+}

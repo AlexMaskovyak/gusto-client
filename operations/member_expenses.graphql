@@ -1,0 +1,41 @@
+query MemberExpenses($after: String, $first: Int) {
+  member {
+    id
+    expenses {
+      expenses(after: $after, first: $first, filter: {}, order: "-created_at") {
+        nodes {
+          id
+          amount
+          approvedBy
+          categoryName
+          categoryUuid
+          checkDate
+          createdAt
+          currency
+          description
+          displayName
+          purchaseDate
+          status
+          statusReason
+          member {
+            id
+          }
+          receipt {
+            id
+            contentType
+            name
+          }
+          vendor {
+            id
+            name
+          }
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
+          hasPreviousPage
+        }
+      }
+    }
+  }
+}

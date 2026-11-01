@@ -1,0 +1,7 @@
+query CompanyHasBecomePayingCustomer($readBasicCompanyInfoPermission: Boolean!) {
+  company {
+    id
+    hasBecomePayingCustomer @include(if: $readBasicCompanyInfoPermission)
+    __typename
+  }
+}
