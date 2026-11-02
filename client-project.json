@@ -12,5 +12,8 @@
   ],
   "service": null,
   "lockfile": "poetry.lock",
-  "allowInferred": false
+  "allowInferred": false,
+  "requiredOperations": [
+    "MemberExpenses"
+  ]
 }

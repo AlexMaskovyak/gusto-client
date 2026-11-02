@@ -1,6 +1,6 @@
 # gusto-client
 
-Python methods and CLI commands generated from 16 API operations.
+Python methods and CLI commands generated from 13 API operations.
 The generator produced every file in this project. No service-specific source
 patches are needed. This operation set does not imply coverage of every service API.
 
@@ -12,7 +12,7 @@ From this generated directory:
 ```sh
 poetry install --with dev
 poetry run gusto-client --help
-poetry run gusto-client CofounderAnnouncementBarCurrentUserRole --help
+poetry run gusto-client MemberExpenses --help
 poetry run pytest -q
 poetry build
 ```
@@ -25,12 +25,12 @@ service requests. Tests use synthetic responses; they do not prove live compatib
 The configured endpoint is `https://graphql.app.gusto.com/`. With an interactive terminal:
 
 ```sh
-poetry run gusto-client CofounderAnnouncementBarCurrentUserRole --login
+poetry run gusto-client MemberExpenses --help
 ```
 
 Add `--login` when executing an operation to open `https://app.gusto.com/payroll_admin/expenses/team`. Sign in,
 open the relevant application page and wait for it to load, then press Enter in
-the terminal. The command sends one read and prints JSON. Use `--output NEW_FILE` to save a private result. Existing files
+the terminal. This command displays help only. Create a JSON object containing the required fields shown there and pass its path with --input FILE when calling the operation. Use `--output NEW_FILE` to save a private result. Existing files
 are refused. Each --login invocation opens a fresh login; the browser closes afterward.
 
 Configured additional session-header names: apollographql-client-name, apollographql-client-version, x-role-id.

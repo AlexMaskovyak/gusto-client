@@ -1,24 +1,6 @@
 {
   "artifacts": [
     {
-      "content": "query CofounderAnnouncementBarCurrentUserRole {\n  currentUserRole {\n    id\n    cowork {\n      ...CofounderAnnouncementBarCowork\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment CofounderAnnouncementBarCowork on Cowork {\n  id\n  segmentation {\n    id\n    accountingConnection\n    workforce\n    __typename\n  }\n  settings {\n    id\n    onboardingStatus\n    __typename\n  }\n  __typename\n}\n",
-      "id": "artifact-fdb975bf16ec1ceae27bae7e70cb40b2f385c82828fa088df2b35bfa2c3be1f7",
-      "kind": "graphql-operations",
-      "name": "CofounderAnnouncementBarCurrentUserRole.graphql",
-      "provenance": {
-        "derivedFrom": [],
-        "locations": [],
-        "producers": [
-          {
-            "name": "website-client",
-            "version": "0.1.0"
-          }
-        ],
-        "source": "external"
-      },
-      "sha256": "4cef1a5b18616c51e1e07426ffa1b1b8f6e6a8fa767b9de34f6f70ef6e6712f6"
-    },
-    {
       "content": "query CompanyHasBecomePayingCustomer($readBasicCompanyInfoPermission: Boolean!) {\n  company {\n    id\n    hasBecomePayingCustomer @include(if: $readBasicCompanyInfoPermission)\n    __typename\n  }\n}\n",
       "id": "artifact-bc48f19fbdc02477ac2d40f4b20bb9a1c26bfd82a7a6f9ff8c39ef9bee535f9c",
       "kind": "graphql-operations",
@@ -53,24 +35,6 @@
         "source": "external"
       },
       "sha256": "ade024c34f36b2cf21fb408d6b8726c0d120ddb168d587ceda11cfd0d48c55a9"
-    },
-    {
-      "content": "mutation CreateMemberExpense($input: CreateMemberExpenseInput!) {\n  payload: createMemberExpense(input: $input) {\n    errors {\n      argument\n      message\n    }\n    oneTimeReimbursement {\n      ...TeamExpense\n    }\n  }\n}\n\nfragment Expense on OneTimeReimbursement {\n  id\n  amount\n  approvedBy\n  categoryName\n  categoryUuid\n  checkDate\n  createdAt\n  currency\n  description\n  displayName\n  eorOneTimeReimbursement {\n    id\n    category\n    title\n  }\n  member {\n    id\n    latestEmployment {\n      id\n      isEor\n      workerType\n    }\n    preferredFullName\n  }\n  purchaseDate\n  rateData {\n    amount\n    categoryRateUuid\n    name\n    rateBaseKind\n    rateConversionAmount\n  }\n  receipt {\n    id\n    contentType\n    name\n    url\n  }\n  status\n  statusReason\n  vendor {\n    id\n    name\n  }\n}\n\nfragment TeamExpense on OneTimeReimbursement {\n  availableActions\n  ...Expense\n}\n",
-      "id": "artifact-83888155ea280dd470ac9a672c05fbf1ebc81df72c169892053328de53008249",
-      "kind": "graphql-operations",
-      "name": "CreateMemberExpense.graphql",
-      "provenance": {
-        "derivedFrom": [],
-        "locations": [],
-        "producers": [
-          {
-            "name": "website-client",
-            "version": "0.1.0"
-          }
-        ],
-        "source": "external"
-      },
-      "sha256": "8bc4bed285f995451ad5417d22fa4cb07631235fa5d2053078e0a194a0f7947a"
     },
     {
       "content": "query DashboardApisCompanyIsGusEnabled {\n  company {\n    id\n    isGusEnabled\n    __typename\n  }\n}\n",
@@ -163,8 +127,8 @@
       "sha256": "166b4f1d6fafd1e3e824fe78af7d55c0b02952d09569b62602b8a185ae1c80e3"
     },
     {
-      "content": "query MemberExpenses($after: String, $first: Int) {\n  member {\n    id\n    expenses {\n      expenses(after: $after, first: $first, filter: {}, order: \"-created_at\") {\n        nodes {\n          id\n          amount\n          approvedBy\n          categoryName\n          categoryUuid\n          checkDate\n          createdAt\n          currency\n          description\n          displayName\n          purchaseDate\n          status\n          statusReason\n          member {\n            id\n          }\n          receipt {\n            id\n            contentType\n            name\n          }\n          vendor {\n            id\n            name\n          }\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n        }\n      }\n    }\n  }\n}\n",
-      "id": "artifact-6800b024358b4e41896e9211fa3979f1a20d314fe4e00bf746e2005d84ea7c7a",
+      "content": "query MemberExpenses($after: String, $before: String, $filter: ExpensesFilter, $first: Int, $includeVendors: Boolean = false, $last: Int, $order: String, $search: String, $teamExpenses: Boolean!) {\n  member {\n    id\n    expenses {\n      id\n      approvableExpenses(\n        after: $after\n        before: $before\n        filter: $filter\n        first: $first\n        last: $last\n        order: $order\n        search: $search\n      ) @include(if: $teamExpenses) {\n        nodes {\n          ...TeamExpense\n          __typename\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          __typename\n        }\n        __typename\n      }\n      categories {\n        ...Category\n        __typename\n      }\n      expenses(\n        after: $after\n        before: $before\n        filter: $filter\n        first: $first\n        last: $last\n        order: $order\n        search: $search\n      ) @skip(if: $teamExpenses) {\n        nodes {\n          ...Expense\n          __typename\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          __typename\n        }\n        __typename\n      }\n      vendors(limit: 250) @include(if: $includeVendors) {\n        id\n        name\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment Category on ExpenseCategory {\n  id\n  isDefaultCategory\n  isDisabled\n  name\n  rates {\n    nodes {\n      ...CategoryRate\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment CategoryRate on ExpenseCategoryRate {\n  id\n  isActive\n  name\n  rateBaseKind\n  rateConversionAmount\n  __typename\n}\n\nfragment Expense on OneTimeReimbursement {\n  id\n  amount\n  approvedBy\n  categoryName\n  categoryUuid\n  checkDate\n  createdAt\n  currency\n  description\n  displayName\n  eorOneTimeReimbursement {\n    id\n    category\n    title\n    __typename\n  }\n  member {\n    id\n    latestEmployment {\n      id\n      isEor\n      workerType\n      __typename\n    }\n    preferredFullName\n    __typename\n  }\n  purchaseDate\n  rateData {\n    amount\n    categoryRateUuid\n    name\n    rateBaseKind\n    rateConversionAmount\n    __typename\n  }\n  receipt {\n    id\n    contentType\n    name\n    url\n    __typename\n  }\n  status\n  statusReason\n  vendor {\n    id\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment TeamExpense on OneTimeReimbursement {\n  availableActions\n  ...Expense\n  __typename\n}\n",
+      "id": "artifact-c4818dd647a7cab396c1a9d1754aaccafa26be9858f54e4db9d610bdf0f8c47e",
       "kind": "graphql-operations",
       "name": "MemberExpenses.graphql",
       "provenance": {
@@ -178,7 +142,7 @@
         ],
         "source": "external"
       },
-      "sha256": "444e473932ee1801a16823dd8e68b9dcdd7ad79a43c65710afbef2d1da92efb3"
+      "sha256": "895a15d49882b59ebc1e93239055575e7372e52513f4ecb54f16161fa9b8884a"
     },
     {
       "content": "query MobileAppGrowthUpsell {\n  mobileAppGrowthUpsell {\n    id\n    __typename\n    platform\n  }\n}\n",
@@ -215,24 +179,6 @@
         "source": "external"
       },
       "sha256": "0f65400ef56f4288eeb2f0f76f57dc32b935bb1e40e158e2aa7bb695b9d9b4ac"
-    },
-    {
-      "content": "query ReimbursementOptions {\n  member {\n    id\n    expenses {\n      categories {\n        id\n        name\n        isDisabled\n        rates {\n          nodes {\n            id\n            name\n            isActive\n            rateBaseKind\n            rateConversionAmount\n          }\n        }\n      }\n    }\n  }\n}\n",
-      "id": "artifact-57577b5a8e6de3795079b7faa58703c9642235925fa4549419abc22e3145bcd8",
-      "kind": "graphql-operations",
-      "name": "ReimbursementOptions.graphql",
-      "provenance": {
-        "derivedFrom": [],
-        "locations": [],
-        "producers": [
-          {
-            "name": "website-client",
-            "version": "0.1.0"
-          }
-        ],
-        "source": "external"
-      },
-      "sha256": "793decfb2363bc15ece1da43312a8d1e82c0a5dbc9a397f732992b1069e5f529"
     },
     {
       "content": "query SupportPage($canReadCompanyAddresses: Boolean!, $companyId: ID!, $featureFlagInputs: [GustoFfeFeatureInput!]!, $isAccountant: Boolean!, $isPayrollAdmin: Boolean!) {\n  accountant @include(if: $isAccountant) {\n    id\n    accountingFirm {\n      id\n      partnerProgramInfo {\n        currentLevel\n        discountedClientsCount\n        __typename\n      }\n      phone\n      __typename\n    }\n    email\n    firstName\n    lastName\n    phone\n    __typename\n  }\n  company {\n    id\n    dedicatedSupportContact @include(if: $isPayrollAdmin) {\n      id\n      __typename\n    }\n    dsaChatEnabled @include(if: $isPayrollAdmin)\n    filingAddress @include(if: $canReadCompanyAddresses) {\n      id\n      state\n      __typename\n    }\n    fractionalHrPartners @include(if: $isPayrollAdmin) {\n      id\n      email\n      name\n      __typename\n    }\n    hasRunPayroll @include(if: $isPayrollAdmin)\n    isApproved\n    isEmbeddedPayrollCompany\n    isOnboarding\n    isSuspended\n    premiumFreeTrialStatus @include(if: $isPayrollAdmin) {\n      daysRemaining\n      onTrial\n      __typename\n    }\n    __typename\n  }\n  currentUser @include(if: $isPayrollAdmin) {\n    id\n    isHrSupportCenterUser(companyId: $companyId)\n    __typename\n  }\n  currentUserRole @include(if: $isPayrollAdmin) {\n    id\n    phone\n    __typename\n  }\n  employee {\n    id\n    nextPayDay\n    __typename\n  }\n  gustoFfeFeatures(input: $featureFlagInputs) {\n    ...GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields\n    __typename\n  }\n  member {\n    id\n    currentHomeLocation {\n      id\n      country\n      __typename\n    }\n    currentWorkLocation {\n      id\n      country\n      __typename\n    }\n    __typename\n  }\n  supportInfo {\n    id\n    emailRestrictionEnabled\n    miawIdentityToken\n    phoneNumber\n    prioritySupport\n    ...DefaultQuickActions\n    ...HoopData\n    ...SearchOptions\n    ...TechnicalAccountManager\n    __typename\n  }\n}\n\nfragment DefaultQuickActions on SupportInfo {\n  defaultQuickActions {\n    chatSkill\n    href\n    keywords\n    phoneSkill\n    tagIconType\n    tagText\n    title\n    __typename\n  }\n  __typename\n}\n\nfragment GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields on GustoFfeFeatureResult {\n  __typename\n  entityId\n  entityType\n  featureFlagKey\n  featureVariables {\n    __typename\n    ... on StringFeatureVariable {\n      stringVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on IntFeatureVariable {\n      intVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on FloatFeatureVariable {\n      floatVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on BooleanFeatureVariable {\n      booleanVariableValue: variableValue\n      variableKey\n      __typename\n    }\n    ... on JsonFeatureVariable {\n      jsonVariableValue: variableValue\n      variableKey\n      __typename\n    }\n  }\n  isFeatureEnabled\n  projectEntity\n  variationName\n}\n\nfragment HoopData on SupportInfo {\n  id\n  closures {\n    channelName\n    daysClosed\n    endAt\n    eventTitle\n    returnAt\n    startAt\n    teamName\n    __typename\n  }\n  hoop {\n    channel\n    supportTeam\n    weeklyHours {\n      closeAt\n      isClosed\n      isHoliday\n      openAt\n      weekdayIndex\n      __typename\n    }\n    __typename\n  }\n  nextAvailableHoop\n  supportTeamForUserRole\n  __typename\n}\n\nfragment SearchOptions on SupportInfo {\n  searchOptions {\n    popularSearchOptions {\n      label\n      value\n      __typename\n    }\n    suggestedSearchOptions {\n      label\n      value\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment TechnicalAccountManager on SupportInfo {\n  dsaAvailableForLiveChat\n  salesAccountManager {\n    email\n    firstName\n    lastName\n    phoneExtension\n    salesforceAccountId\n    salesforceResellerAccountId\n    __typename\n  }\n  technicalAccountManager {\n    email\n    firstName\n    lastName\n    phoneExtension\n    salesforceAccountId\n    salesforceResellerAccountId\n    __typename\n  }\n  __typename\n}\n",
@@ -289,8 +235,8 @@
       "sha256": "045a230fa9911c9b9c96b67d5695a331b1d084d0a335cf4f90dfbd084c0ebc6c"
     },
     {
-      "content": "{\"endpoints\": [{\"graphql\": {\"name\": \"CofounderAnnouncementBarCurrentUserRole\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"CompanyHasBecomePayingCustomer\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"CompanyOnboardingAndFromDirectSegment\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"CreateMemberExpense\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"DashboardApisCompanyIsGusEnabled\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"DashboardApisUseCurrentCompanySubscriptions\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"FirmLogo\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"GetCurrentCompanyOnboardingExperienceType\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"GustoFfe\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"MemberExpenses\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"MobileAppGrowthUpsell\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"ReferralsNavLinkContainer\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"ReimbursementOptions\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"SupportPage\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"TopBarCompany\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"UseAdminOverrideRedirect\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}]}",
-      "id": "artifact-36d203681653078c71360dc33e75541395eae96a5fc1cc2004142bad01356e0c",
+      "content": "{\"endpoints\": [{\"graphql\": {\"name\": \"CompanyHasBecomePayingCustomer\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"CompanyOnboardingAndFromDirectSegment\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"DashboardApisCompanyIsGusEnabled\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"DashboardApisUseCurrentCompanySubscriptions\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"FirmLogo\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"GetCurrentCompanyOnboardingExperienceType\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"GustoFfe\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"MemberExpenses\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"MobileAppGrowthUpsell\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"ReferralsNavLinkContainer\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"SupportPage\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"TopBarCompany\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}, {\"graphql\": {\"name\": \"UseAdminOverrideRedirect\"}, \"method\": \"POST\", \"origin\": \"https://graphql.app.gusto.com\", \"path\": \"/\", \"queryParameters\": [\"operationName\"]}]}",
+      "id": "artifact-de689010daa24069cb4aac327235fdeafb343e42286008b13f43ea4b11dba7ce",
       "kind": "report",
       "name": "discovery.json",
       "provenance": {
@@ -304,10 +250,10 @@
         ],
         "source": "external"
       },
-      "sha256": "dcbd06ce5253f08ca968fa1f08410c60e7bbb6b689564257baf4ed766f75e2e8"
+      "sha256": "3d1fc63d3bf37e0367f7dc1230c0313846bc013b096b172ecd98c2116c2f3753"
     }
   ],
-  "createdAt": "2026-11-01T22:17:04.673870+00:00",
+  "createdAt": "2026-11-02T01:58:32.401246+00:00",
   "format": "website-client-discovery",
   "producer": {
     "name": "website-client",
@@ -319,19 +265,16 @@
       "endpoint": "https://graphql.app.gusto.com/",
       "id": "service-f56784fba33a5502",
       "operationArtifacts": [
-        "artifact-fdb975bf16ec1ceae27bae7e70cb40b2f385c82828fa088df2b35bfa2c3be1f7",
         "artifact-bc48f19fbdc02477ac2d40f4b20bb9a1c26bfd82a7a6f9ff8c39ef9bee535f9c",
         "artifact-6c97fbc263026fb5703f18169e61c4048fe4debaf27c6f4f02458f9c848d7bee",
-        "artifact-83888155ea280dd470ac9a672c05fbf1ebc81df72c169892053328de53008249",
         "artifact-3c855838ec55ad10c2f585117b95c8e6057da64b1085691d19fe78e7dac4cb26",
         "artifact-2541ad07ffc6ca8a453dc4b375193b71a9f0ea93914a05fbf67d54e0e6b25ac6",
         "artifact-482613aa527b3ef604986875beae409c536bbb5e873aa20a499f736cf78e0d39",
         "artifact-d9037a9f69521ca4a661c95aa3eae6cbfa48e4893ab66e554dc0200ae0f8ae5f",
         "artifact-5fb531a5f730d002a1f55bf05053f28f8bc961003fac5cc58f642bab5884940e",
-        "artifact-6800b024358b4e41896e9211fa3979f1a20d314fe4e00bf746e2005d84ea7c7a",
+        "artifact-c4818dd647a7cab396c1a9d1754aaccafa26be9858f54e4db9d610bdf0f8c47e",
         "artifact-05906421071afbe70d977dbcd194348ed8b8e3fbe34f127d9e480ca336854d44",
         "artifact-2c1ec5efdd25b5951aacee629fe97239cfd802a7443684dbae788d5993d86e55",
-        "artifact-57577b5a8e6de3795079b7faa58703c9642235925fa4549419abc22e3145bcd8",
         "artifact-9388f6690ca7d96a8b574dcaf3218c4469e76bb87fcfd3fde16ffc71485ea3fc",
         "artifact-42ed2680904bfe971d2c1a90f900892c72d50acddae620ca329c132d54474e85",
         "artifact-1c55616f1f750427d6a2c320c35751d76b58ba27ad1011207f0c3a51fa3b733c"

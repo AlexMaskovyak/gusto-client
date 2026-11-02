@@ -12,24 +12,6 @@ class Client(OperationClient):
     declared variables; they do not assert complete server API coverage.
     """
 
-    def cofounder_announcement_bar_current_user_role(self) -> dict[str, Any]:
-        """Run the GraphQL query CofounderAnnouncementBarCurrentUserRole.
-        
-        Returns:
-            The response's data object as a JSON dictionary. Response fields and
-            custom input fields are not validated without a server schema.
-        
-        Raises:
-            ValueError: Declared variables are invalid or mutation permission is missing.
-            OperationError: The server returns a non-success HTTP status.
-            RuntimeError: The response is oversized, invalid JSON or contains GraphQL errors.
-            httpx.HTTPError: The HTTP transport fails. Browser login can raise BrowserError.
-        
-        No automatic retry occurs. Check the service before retrying an uncertain write.
-        """
-        values = {}
-        return self._execute('CofounderAnnouncementBarCurrentUserRole', {key: value for key, value in values.items() if value is not UNSET})
-
     def company_has_become_paying_customer(self, *, readBasicCompanyInfoPermission: Any) -> dict[str, Any]:
         """Run the GraphQL query CompanyHasBecomePayingCustomer.
         
@@ -68,29 +50,6 @@ class Client(OperationClient):
         """
         values = {}
         return self._execute('CompanyOnboardingAndFromDirectSegment', {key: value for key, value in values.items() if value is not UNSET})
-
-    def create_member_expense(self, *, input: Any) -> dict[str, Any]:
-        """Send the GraphQL mutation CreateMemberExpense.
-        
-        Requires a client constructed with allow_writes=True.
-        
-        Args:
-            input: GraphQL $input: CreateMemberExpenseInput!. Required.
-        
-        Returns:
-            The response's data object as a JSON dictionary. Response fields and
-            custom input fields are not validated without a server schema.
-        
-        Raises:
-            ValueError: Declared variables are invalid or mutation permission is missing.
-            OperationError: The server returns a non-success HTTP status.
-            RuntimeError: The response is oversized, invalid JSON or contains GraphQL errors.
-            httpx.HTTPError: The HTTP transport fails. Browser login can raise BrowserError.
-        
-        No automatic retry occurs. Check the service before retrying an uncertain write.
-        """
-        values = {'input': input}
-        return self._execute('CreateMemberExpense', {key: value for key, value in values.items() if value is not UNSET})
 
     def dashboard_apis_company_is_gus_enabled(self) -> dict[str, Any]:
         """Run the GraphQL query DashboardApisCompanyIsGusEnabled.
@@ -188,12 +147,19 @@ class Client(OperationClient):
         values = {'input': input}
         return self._execute('GustoFfe', {key: value for key, value in values.items() if value is not UNSET})
 
-    def member_expenses(self, *, after: Any = UNSET, first: Any = UNSET) -> dict[str, Any]:
+    def member_expenses(self, *, after: Any = UNSET, before: Any = UNSET, filter: Any = UNSET, first: Any = UNSET, includeVendors: Any = UNSET, last: Any = UNSET, order: Any = UNSET, search: Any = UNSET, teamExpenses: Any) -> dict[str, Any]:
         """Run the GraphQL query MemberExpenses.
         
         Args:
             after: GraphQL $after: String. Defaults to UNSET, leaving the variable for the server to resolve.
+            before: GraphQL $before: String. Defaults to UNSET, leaving the variable for the server to resolve.
+            filter: GraphQL $filter: ExpensesFilter. Defaults to UNSET, leaving the variable for the server to resolve.
             first: GraphQL $first: Int. Defaults to UNSET, leaving the variable for the server to resolve.
+            includeVendors: GraphQL $includeVendors: Boolean. Defaults to UNSET, leaving the variable for the server to resolve.
+            last: GraphQL $last: Int. Defaults to UNSET, leaving the variable for the server to resolve.
+            order: GraphQL $order: String. Defaults to UNSET, leaving the variable for the server to resolve.
+            search: GraphQL $search: String. Defaults to UNSET, leaving the variable for the server to resolve.
+            teamExpenses: GraphQL $teamExpenses: Boolean!. Required.
         
         Returns:
             The response's data object as a JSON dictionary. Response fields and
@@ -207,7 +173,7 @@ class Client(OperationClient):
         
         No automatic retry occurs. Check the service before retrying an uncertain write.
         """
-        values = {'after': after, 'first': first}
+        values = {'after': after, 'before': before, 'filter': filter, 'first': first, 'includeVendors': includeVendors, 'last': last, 'order': order, 'search': search, 'teamExpenses': teamExpenses}
         return self._execute('MemberExpenses', {key: value for key, value in values.items() if value is not UNSET})
 
     def mobile_app_growth_upsell(self) -> dict[str, Any]:
@@ -245,24 +211,6 @@ class Client(OperationClient):
         """
         values = {}
         return self._execute('ReferralsNavLinkContainer', {key: value for key, value in values.items() if value is not UNSET})
-
-    def reimbursement_options(self) -> dict[str, Any]:
-        """Run the GraphQL query ReimbursementOptions.
-        
-        Returns:
-            The response's data object as a JSON dictionary. Response fields and
-            custom input fields are not validated without a server schema.
-        
-        Raises:
-            ValueError: Declared variables are invalid or mutation permission is missing.
-            OperationError: The server returns a non-success HTTP status.
-            RuntimeError: The response is oversized, invalid JSON or contains GraphQL errors.
-            httpx.HTTPError: The HTTP transport fails. Browser login can raise BrowserError.
-        
-        No automatic retry occurs. Check the service before retrying an uncertain write.
-        """
-        values = {}
-        return self._execute('ReimbursementOptions', {key: value for key, value in values.items() if value is not UNSET})
 
     def support_page(self, *, canReadCompanyAddresses: Any, companyId: Any, featureFlagInputs: Any, isAccountant: Any, isPayrollAdmin: Any) -> dict[str, Any]:
         """Run the GraphQL query SupportPage.

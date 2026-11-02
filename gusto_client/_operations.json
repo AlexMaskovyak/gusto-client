@@ -1,15 +1,4 @@
 {
-  "CofounderAnnouncementBarCurrentUserRole": {
-    "kind": "graphql-operation",
-    "method": "cofounder_announcement_bar_current_user_role",
-    "httpMethod": "POST",
-    "operationNameInUrl": true,
-    "requestStyleObserved": true,
-    "write": false,
-    "document": "query CofounderAnnouncementBarCurrentUserRole {\n  currentUserRole {\n    id\n    cowork {\n      ...CofounderAnnouncementBarCowork\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment CofounderAnnouncementBarCowork on Cowork {\n  id\n  segmentation {\n    id\n    accountingConnection\n    workforce\n    __typename\n  }\n  settings {\n    id\n    onboardingStatus\n    __typename\n  }\n  __typename\n}\n",
-    "variables": [],
-    "description": "Captured GraphQL query; complete schema not required."
-  },
   "CompanyHasBecomePayingCustomer": {
     "kind": "graphql-operation",
     "method": "company_has_become_paying_customer",
@@ -38,24 +27,6 @@
     "document": "query CompanyOnboardingAndFromDirectSegment {\n  company {\n    ...CompanyOnboardingAndFromDirectSegmentFields\n    __typename\n  }\n}\n\nfragment CompanyOnboardingAndFromDirectSegmentFields on Company {\n  id\n  fromDirectSegment\n  hasBecomePayingCustomer\n  __typename\n}\n",
     "variables": [],
     "description": "Captured GraphQL query; complete schema not required."
-  },
-  "CreateMemberExpense": {
-    "kind": "graphql-operation",
-    "method": "create_member_expense",
-    "httpMethod": "POST",
-    "operationNameInUrl": true,
-    "requestStyleObserved": true,
-    "write": true,
-    "document": "mutation CreateMemberExpense($input: CreateMemberExpenseInput!) {\n  payload: createMemberExpense(input: $input) {\n    errors {\n      argument\n      message\n    }\n    oneTimeReimbursement {\n      ...TeamExpense\n    }\n  }\n}\n\nfragment Expense on OneTimeReimbursement {\n  id\n  amount\n  approvedBy\n  categoryName\n  categoryUuid\n  checkDate\n  createdAt\n  currency\n  description\n  displayName\n  eorOneTimeReimbursement {\n    id\n    category\n    title\n  }\n  member {\n    id\n    latestEmployment {\n      id\n      isEor\n      workerType\n    }\n    preferredFullName\n  }\n  purchaseDate\n  rateData {\n    amount\n    categoryRateUuid\n    name\n    rateBaseKind\n    rateConversionAmount\n  }\n  receipt {\n    id\n    contentType\n    name\n    url\n  }\n  status\n  statusReason\n  vendor {\n    id\n    name\n  }\n}\n\nfragment TeamExpense on OneTimeReimbursement {\n  availableActions\n  ...Expense\n}\n",
-    "variables": [
-      {
-        "name": "input",
-        "parameter": "input",
-        "type": "CreateMemberExpenseInput!",
-        "required": true
-      }
-    ],
-    "description": "Captured GraphQL mutation; complete schema not required."
   },
   "DashboardApisCompanyIsGusEnabled": {
     "kind": "graphql-operation",
@@ -133,7 +104,7 @@
     "operationNameInUrl": true,
     "requestStyleObserved": true,
     "write": false,
-    "document": "query MemberExpenses($after: String, $first: Int) {\n  member {\n    id\n    expenses {\n      expenses(after: $after, first: $first, filter: {}, order: \"-created_at\") {\n        nodes {\n          id\n          amount\n          approvedBy\n          categoryName\n          categoryUuid\n          checkDate\n          createdAt\n          currency\n          description\n          displayName\n          purchaseDate\n          status\n          statusReason\n          member {\n            id\n          }\n          receipt {\n            id\n            contentType\n            name\n          }\n          vendor {\n            id\n            name\n          }\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n        }\n      }\n    }\n  }\n}\n",
+    "document": "query MemberExpenses($after: String, $before: String, $filter: ExpensesFilter, $first: Int, $includeVendors: Boolean = false, $last: Int, $order: String, $search: String, $teamExpenses: Boolean!) {\n  member {\n    id\n    expenses {\n      id\n      approvableExpenses(\n        after: $after\n        before: $before\n        filter: $filter\n        first: $first\n        last: $last\n        order: $order\n        search: $search\n      ) @include(if: $teamExpenses) {\n        nodes {\n          ...TeamExpense\n          __typename\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          __typename\n        }\n        __typename\n      }\n      categories {\n        ...Category\n        __typename\n      }\n      expenses(\n        after: $after\n        before: $before\n        filter: $filter\n        first: $first\n        last: $last\n        order: $order\n        search: $search\n      ) @skip(if: $teamExpenses) {\n        nodes {\n          ...Expense\n          __typename\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          __typename\n        }\n        __typename\n      }\n      vendors(limit: 250) @include(if: $includeVendors) {\n        id\n        name\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment Category on ExpenseCategory {\n  id\n  isDefaultCategory\n  isDisabled\n  name\n  rates {\n    nodes {\n      ...CategoryRate\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment CategoryRate on ExpenseCategoryRate {\n  id\n  isActive\n  name\n  rateBaseKind\n  rateConversionAmount\n  __typename\n}\n\nfragment Expense on OneTimeReimbursement {\n  id\n  amount\n  approvedBy\n  categoryName\n  categoryUuid\n  checkDate\n  createdAt\n  currency\n  description\n  displayName\n  eorOneTimeReimbursement {\n    id\n    category\n    title\n    __typename\n  }\n  member {\n    id\n    latestEmployment {\n      id\n      isEor\n      workerType\n      __typename\n    }\n    preferredFullName\n    __typename\n  }\n  purchaseDate\n  rateData {\n    amount\n    categoryRateUuid\n    name\n    rateBaseKind\n    rateConversionAmount\n    __typename\n  }\n  receipt {\n    id\n    contentType\n    name\n    url\n    __typename\n  }\n  status\n  statusReason\n  vendor {\n    id\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment TeamExpense on OneTimeReimbursement {\n  availableActions\n  ...Expense\n  __typename\n}\n",
     "variables": [
       {
         "name": "after",
@@ -142,10 +113,52 @@
         "required": false
       },
       {
+        "name": "before",
+        "parameter": "before",
+        "type": "String",
+        "required": false
+      },
+      {
+        "name": "filter",
+        "parameter": "filter",
+        "type": "ExpensesFilter",
+        "required": false
+      },
+      {
         "name": "first",
         "parameter": "first",
         "type": "Int",
         "required": false
+      },
+      {
+        "name": "includeVendors",
+        "parameter": "includeVendors",
+        "type": "Boolean",
+        "required": false
+      },
+      {
+        "name": "last",
+        "parameter": "last",
+        "type": "Int",
+        "required": false
+      },
+      {
+        "name": "order",
+        "parameter": "order",
+        "type": "String",
+        "required": false
+      },
+      {
+        "name": "search",
+        "parameter": "search",
+        "type": "String",
+        "required": false
+      },
+      {
+        "name": "teamExpenses",
+        "parameter": "teamExpenses",
+        "type": "Boolean!",
+        "required": true
       }
     ],
     "description": "Captured GraphQL query; complete schema not required."
@@ -169,17 +182,6 @@
     "requestStyleObserved": true,
     "write": false,
     "document": "query ReferralsNavLinkContainer {\n  currentUser {\n    id\n    referralRewards {\n      id\n      isPromotional\n      maxReferrerDollarAmount\n      referrerRewardType\n      __typename\n    }\n    referrals {\n      id\n      unreadReferralsCount\n      __typename\n    }\n    __typename\n  }\n}\n",
-    "variables": [],
-    "description": "Captured GraphQL query; complete schema not required."
-  },
-  "ReimbursementOptions": {
-    "kind": "graphql-operation",
-    "method": "reimbursement_options",
-    "httpMethod": "POST",
-    "operationNameInUrl": true,
-    "requestStyleObserved": true,
-    "write": false,
-    "document": "query ReimbursementOptions {\n  member {\n    id\n    expenses {\n      categories {\n        id\n        name\n        isDisabled\n        rates {\n          nodes {\n            id\n            name\n            isActive\n            rateBaseKind\n            rateConversionAmount\n          }\n        }\n      }\n    }\n  }\n}\n",
     "variables": [],
     "description": "Captured GraphQL query; complete schema not required."
   },
