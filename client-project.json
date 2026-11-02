@@ -11,5 +11,6 @@
     "x-role-id"
   ],
   "service": null,
-  "lockfile": "poetry.lock"
+  "lockfile": "poetry.lock",
+  "allowInferred": false
 }

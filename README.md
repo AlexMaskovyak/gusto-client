@@ -1,6 +1,6 @@
 # gusto-client
 
-Python methods and CLI commands generated from 16 captured GraphQL operations.
+Python methods and CLI commands generated from 16 API operations.
 The generator produced every file in this project. No service-specific source
 patches are needed. This operation set does not imply coverage of every service API.
 
@@ -28,27 +28,26 @@ The configured endpoint is `https://graphql.app.gusto.com/`. With an interactive
 poetry run gusto-client CofounderAnnouncementBarCurrentUserRole --login
 ```
 
-This opens `https://app.gusto.com/payroll_admin/expenses/team`. Sign in, open the relevant application page and
-wait for it to load, then press Enter in the terminal. The command sends one read
-and prints JSON. Use `--output NEW_FILE` to save a private result. Existing files
-are refused. Each invocation opens a fresh login; the browser closes afterward.
+Add `--login` when executing an operation to open `https://app.gusto.com/payroll_admin/expenses/team`. Sign in,
+open the relevant application page and wait for it to load, then press Enter in
+the terminal. The command sends one read and prints JSON. Use `--output NEW_FILE` to save a private result. Existing files
+are refused. Each --login invocation opens a fresh login; the browser closes afterward.
 
 Configured additional session-header names: apollographql-client-name, apollographql-client-version, x-role-id.
 Their values are observed in memory at the API origin. Never put tokens in source
 files or command arguments. Missing required headers can cause HTTP 403. Inspect
 the application request and update `client-project.json` if its contract changes.
 
-For operations with variables, create a JSON object using the names/types in that
-operation's help and pass `--input FILE`. Mutation commands require
-`--confirm-write OPERATION` with the exact operation name. Python mutations require
-`Client(..., allow_writes=True)`. No automatic retries occur. Check the service before
+For operations with inputs, create a JSON object using the names/types in that
+operation's help and pass `--input FILE`. Write commands require
+`--confirm-write OPERATION` with the exact operation name. No automatic retries occur. Check the service before
 retrying an uncertain write. Receipt uploads, pagination and other multi-step
 workflows require their own captured operations and orchestration.
 
 ## Reproduce this project
 
-`inputs/manifest.json` contains the selected operation documents and request
-conventions. `client-project.json` supplies public endpoint/login configuration
+`inputs/manifest.json` contains the selected API definition or operation documents
+and request conventions. `client-project.json` supplies public endpoint/login configuration
 and header names. No saved login or account values are needed to build.
 Using an installed compatible generator, from this directory:
 
@@ -63,9 +62,7 @@ existing project. Reuse the same generator revision and lock for reproducibility
 
 ## Validation and ownership
 
-Generated method docstrings describe declared inputs, omission versus null, write
-permission, results and failures. Standard scalar types are validated; custom
-input fields and response shapes remain JSON without a complete server schema.
+Declared standard scalar types are validated; custom input fields and response shapes remain JSON without a complete server schema. Python mutation calls require Client(..., allow_writes=True).
 The service remains authoritative for its records. Generation and
 synthetic tests do not verify submissions or payment. HTTP failures report status
 without response bodies. Authentication stays in browser/process memory.
