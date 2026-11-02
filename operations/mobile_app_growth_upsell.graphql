@@ -1,0 +1,7 @@
+query MobileAppGrowthUpsell {
+  mobileAppGrowthUpsell {
+    id
+    __typename
+    platform
+  }
+}

@@ -1,77 +1,104 @@
-# Gusto Client
+# gusto-client
 
-Discover employee paystubs, read reimbursements, and submit expenses with receipt attachments through injected HTTP transports.
+Python methods and CLI commands generated from 15 API operations.
+The generator produced every file in this project. No service-specific source
+patches are needed. This operation set does not imply coverage of every service API.
 
-The library handles Gusto HTML pagination, payroll-item identity, statement metadata, PDF endpoint discovery, and filenames. It accepts a Fetch-compatible transport so callers can use an authorized browser session or another authentication mechanism. The caller downloads and validates PDF bytes.
+## Install and inspect
 
-Account identifiers, browser state, real manifests, paystubs, and local paths are runtime inputs and are not stored in this repository.
+Use Python 3.11 or newer, Poetry 2.2 or newer and installed Chrome for browser login.
+From this generated directory:
 
-## Design
-
-Discovery keys records by payroll-item UUID. For a JavaScript-rendered listing, supply links enumerated from the rendered browser instead of relying on its empty HTML shell:
-
-```js
-import { GustoClient, buildPaystubManifest } from 'gusto-client';
-
-const client = new GustoClient({ fetch: authenticatedFetch });
-const details = await client.readPaystubDetails(browserRecords, { expectedCount });
-const manifest = buildPaystubManifest(details);
+```sh
+poetry install --with dev
+poetry run gusto-client --help
+poetry run gusto-client MemberExpenses --help
+poetry run pytest -q
+poetry build
 ```
 
-Each input record accepts `url`, `detailUrl`, or `href`, with optional `id` and `label`/`text`. An expected count checks unique payroll items. HTML discovery rejects empty initial pages and repeated pagination; neither can prove a complete account. Detail parsing checks dates and the PDF's payroll-item identity. When a reimbursement summary is present, `reimbursements.current` and `reimbursements.yearToDate` are separate decimal strings.
+Installation may download dependencies. Help, tests and package builds send no
+service requests. Tests use synthetic responses; they do not prove live compatibility.
 
-Transport and authentication are injected. Applications may compose this package with `browser-session-rest-client`, but neither package depends on the other. Errors stop the operation; callers retain inputs and retry after authentication or layout issues are resolved.
+## Call an operation
 
-## Reimbursement records
+The configured endpoint is `https://graphql.app.gusto.com/`. With an interactive terminal:
 
-Read employee expenses through the fixed, read-only query and an authorized Fetch transport:
-
-```js
-import { GustoClient, isReadOnlyReimbursementRequest } from 'gusto-client';
-
-const client = new GustoClient({ fetch: authenticatedFetch });
-const result = await client.listReimbursements({ expectedCount });
+```sh
+poetry run gusto-client MemberExpenses --help
 ```
 
-For transports that restrict POST requests, supply `isReadOnlyReimbursementRequest` as their authorization predicate. It permits only the fixed employee-expense query at the observed endpoint, with bounded page size and cursor variables. The query includes all employee statuses and dates; it does not select team expenses or signed receipt URLs. Verify the account count independently before treating collection as complete.
+Add `--login` when executing an operation to open `https://app.gusto.com/payroll_admin/expenses/team`. Sign in,
+open the relevant application page and wait for it to load, then press Enter in
+the terminal. This command displays help only. Create a JSON object containing the required fields shown there and pass its path with --input FILE when calling the operation. Use `--output NEW_FILE` to save a private result. Existing files
+are refused. Each --login invocation opens a fresh login; the browser closes afterward.
 
-`collectReimbursements(readPage, options)` also supports caller-supplied page requests returning `data.member.expenses.expenses`. Both paths check member identity, stable IDs, page boundaries, non-progressing cursors, partial errors, and an optional expected count.
+Configured additional session-header names: apollographql-client-name, apollographql-client-version, x-role-id.
+Their values are observed in memory at the API origin. Never put tokens in source
+files or command arguments. Missing required headers can cause HTTP 403. Inspect
+the application request and update `client-project.json` if its contract changes.
 
-Records retain decimal amount strings, nullable source currency, original status, creation time, purchase/check dates, approver, vendor, and receipt identity. Expiring receipt URLs are omitted. Unknown statuses remain unchanged. Creation time is not relabeled as a submission time, and a listed record or check date does not establish payment. Payroll evidence and downstream receipt reconciliation belong to the caller.
+For operations with inputs, create a JSON object using the names/types in that
+operation's help and pass `--input FILE`. Write commands require
+`--confirm-write OPERATION` with the exact operation name. No automatic retries occur. Check the service before
+retrying an uncertain write. Operations with a discovered file-upload contract
+accept `--receipt FILE`: metadata upload, exact-byte storage upload and mutation
+run within one login. Supply the original input object without its attachment
+field. Python callers use the generated `<method>_with_file` helper and an
+authenticated metadata client when the application origin differs from the API.
+Unsupported upload protocols and operations without a discovered contract do not
+accept this flag. Pagination and other multi-step workflows remain separate.
 
-## Reimbursement and receipt submission
+## Reproduce this project
 
-`client.listReimbursementOptions()` reads the current member ID, category IDs, disabled state, and mileage rates. `isReadOnlyReimbursementRequest` allows this fixed query as well as the expense listing. Select a current eligible category and supply the approved member, transaction date, currency, vendor and **gross** amount—including gift cards or credits. The client does not choose accounting policy or alter the amount.
+`inputs/manifest.json` contains the selected API definition or operation documents
+and request conventions. `client-project.json` supplies public endpoint/login configuration
+and header names. No saved login or account values are needed to build.
+Using an installed compatible generator, from this directory:
 
-```js
-import { GustoClient, prepareReimbursementSubmission } from 'gusto-client';
-
-const approved = prepareReimbursementSubmission({
-  companyMemberId, categoryUuid, purchaseDate: '2026-03-10',
-  amount: '23.81', currency: 'USD', description: 'Business meal',
-  expenseVendor: { name: 'Example merchant' }
-});
-
-const client = new GustoClient({
-  fetch: authorizedReadFetch,
-  createExpenseFetch,   // Factory receives { origin, authorizeWrite }
-  receiptFetch,         // App-origin POST; authorized for this receipt only
-  createStorageFetch,   // Factory receives { origin, authorizeWrite }; NO app credentials
-  storageOrigins       // Explicitly approved upload origins
-});
-
-// Run only after the caller approves this expense and receipt for submission.
-const result = await client.submitReimbursement(approved, {
-  receipt: { filename: 'receipt.pdf', contentType: 'application/pdf', bytes }
-});
+```sh
+website-client build --project client-project.json --output ../gusto-client-rebuilt
 ```
 
-The caller constructs each factory using its authorized transport; this package does not depend on `browser-session-rest-client`. When using that package, pass the supplied `authorizeWrite` to **both** its authenticated and browser-compatible layers. The receipt metadata request additionally needs the application's current session and CSRF header. `createReceiptUploadGuard(receipt)` scopes that POST; `createReimbursementSubmissionGuard(input)` scopes an exact approved create. Do not broadly permit every POST.
+The output directory must not exist and its parent must exist. The command reads
+local inputs, generates code, documentation and tests, and validates an included
+Poetry lock. It does not call the service. Compare outputs before replacing an
+existing project. Reuse the same generator revision and lock for reproducibility.
 
-Receipts use Gusto's inspected Active Storage flow: metadata POST → exact-byte signed storage PUT → create-expense mutation. PDF/JPEG/PNG/HEIC/HEIF files must match their declared type and be no larger than 15 MB. The storage factory receives an exact URL/byte/header guard; it must carry no application cookies or tokens. `uploadReimbursementReceipt()` is available separately; its returned `fileId` is transient, not a durable receipt identity. An existing uploaded receipt can be supplied as `input.fileId` instead of bytes. Vendor takes exactly `{ id }` or `{ name }`; mileage additionally takes `categoryRateUuid` and `rateAmount`.
+## Validation and ownership
 
-Submission reads the complete employee inventory first and blocks possible duplicates. After creation it requires the new stable expense ID to appear in a fresh complete listing, with matching member, gross amount, transaction date, description, category, vendor and receipt. `submissionVerified` does not mean paid. `paymentVerified` remains false. A null source currency stays null and is reported in `unverifiedFields`, not silently relabeled USD.
+Declared standard scalar types are validated; custom input fields and response shapes remain JSON without a complete server schema. Python mutation calls require Client(..., allow_writes=True).
+The service remains authoritative for its records. Generation and
+synthetic tests do not verify submissions or payment. HTTP failures report status
+without response bodies. Authentication stays in browser/process memory.
 
-There are no automatic write retries. `GustoSubmissionError` reports `phase`, `outcome`, `retryable: false`, and a known `expenseId` when creation succeeded but read-back failed. Reconcile Gusto before retrying an `unknown` or `created-unverified` result. Upload success alone is not submission; unused blobs may remain after a later failure. Raw service errors, signed URLs and tokens are not included in errors or normalized output.
+## Submit with a file
 
-The create operation was generated from inspected frontend definitions with the browser-session generator. Authentication, listing and category reads were verified live; upload/create behavior is covered by synthetic tests, **not a live submission**. No production write is performed by discovery or tests. Read-only client construction remains read-only unless separate write transports are supplied.
+The `CreateMemberExpense` command supports `rails-active-storage-v1`. Prepare its original
+JSON input using the command's help and the application's actual fields. Omit
+`input.fileId`: the upload supplies it.
+A server schema is needed to validate fields inside a custom input object.
+
+The following examples assume `input.json` contains that verified input and
+`receipt.pdf` is your existing local file. Replace those paths as needed.
+Preview validates the file and prints its hash, variables and target endpoints;
+it sends no requests and needs no login or write confirmation:
+
+```sh
+poetry run gusto-client CreateMemberExpense --input input.json --receipt receipt.pdf --preview
+```
+
+After reviewing the preview, this command uploads the file and changes remote data:
+
+```sh
+poetry run gusto-client CreateMemberExpense --input input.json --receipt receipt.pdf --login --confirm-write CreateMemberExpense
+```
+
+One login covers all three stages. Python callers use
+`Client.create_member_expense_with_file(receipt_path=..., metadata_client=..., **arguments)`
+with `allow_writes=True`; supply an application-authenticated metadata client when
+its origin differs from the API. Storage stays credential-free. No stage retries.
+A failed creation can leave an unattached file. Check the application after an
+uncertain result before submitting again. File contracts are inferred source
+evidence; they do not prove live service acceptance or reimbursement.
+

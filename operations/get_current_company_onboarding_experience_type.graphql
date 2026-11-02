@@ -1,0 +1,28 @@
+query GetCurrentCompanyOnboardingExperienceType {
+  company {
+    id
+    companyOnboardingCurrentExperienceType
+    hasAccountingFirm
+    isOnboarding
+    ...OnboardingAdvisorCustomerType
+    __typename
+  }
+  currentUser {
+    id
+    accountant {
+      id
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment OnboardingAdvisorCustomerType on Company {
+  id
+  companyProfileAndIntent {
+    id
+    newToRunningPayroll
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,15 @@
+query TopBarCompany($isPayrollAdmin: Boolean!) {
+  company {
+    id
+    shouldShowBenefitsMaintenance
+    __typename
+  }
+  currentUser {
+    id
+    accountant @include(if: $isPayrollAdmin) {
+      id
+      __typename
+    }
+    __typename
+  }
+}

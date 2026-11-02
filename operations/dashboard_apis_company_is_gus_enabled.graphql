@@ -1,0 +1,7 @@
+query DashboardApisCompanyIsGusEnabled {
+  company {
+    id
+    isGusEnabled
+    __typename
+  }
+}

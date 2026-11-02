@@ -1,0 +1,12 @@
+query FirmLogo($isAccountant: Boolean!) {
+  accountingFirm @include(if: $isAccountant) {
+    id
+    logoUrl
+    __typename
+  }
+  company @skip(if: $isAccountant) {
+    id
+    managingAccountingFirmLogoUrl
+    __typename
+  }
+}

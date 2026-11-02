@@ -1,0 +1,147 @@
+query MemberExpenses($after: String, $before: String, $filter: ExpensesFilter, $first: Int, $includeVendors: Boolean = false, $last: Int, $order: String, $search: String, $teamExpenses: Boolean!) {
+  member {
+    id
+    expenses {
+      id
+      approvableExpenses(
+        after: $after
+        before: $before
+        filter: $filter
+        first: $first
+        last: $last
+        order: $order
+        search: $search
+      ) @include(if: $teamExpenses) {
+        nodes {
+          ...TeamExpense
+          __typename
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          __typename
+        }
+        __typename
+      }
+      categories {
+        ...Category
+        __typename
+      }
+      expenses(
+        after: $after
+        before: $before
+        filter: $filter
+        first: $first
+        last: $last
+        order: $order
+        search: $search
+      ) @skip(if: $teamExpenses) {
+        nodes {
+          ...Expense
+          __typename
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          __typename
+        }
+        __typename
+      }
+      vendors(limit: 250) @include(if: $includeVendors) {
+        id
+        name
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment Category on ExpenseCategory {
+  id
+  isDefaultCategory
+  isDisabled
+  name
+  rates {
+    nodes {
+      ...CategoryRate
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment CategoryRate on ExpenseCategoryRate {
+  id
+  isActive
+  name
+  rateBaseKind
+  rateConversionAmount
+  __typename
+}
+
+fragment Expense on OneTimeReimbursement {
+  id
+  amount
+  approvedBy
+  categoryName
+  categoryUuid
+  checkDate
+  createdAt
+  currency
+  description
+  displayName
+  eorOneTimeReimbursement {
+    id
+    category
+    title
+    __typename
+  }
+  member {
+    id
+    latestEmployment {
+      id
+      isEor
+      workerType
+      __typename
+    }
+    preferredFullName
+    __typename
+  }
+  purchaseDate
+  rateData {
+    amount
+    categoryRateUuid
+    name
+    rateBaseKind
+    rateConversionAmount
+    __typename
+  }
+  receipt {
+    id
+    contentType
+    name
+    url
+    __typename
+  }
+  status
+  statusReason
+  vendor {
+    id
+    name
+    __typename
+  }
+  __typename
+}
+
+fragment TeamExpense on OneTimeReimbursement {
+  availableActions
+  ...Expense
+  __typename
+}

@@ -1,0 +1,44 @@
+query GustoFfe($input: [GustoFfeFeatureInput!]!) {
+  gustoFfeFeatures(input: $input) {
+    ...GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields
+    __typename
+  }
+}
+
+fragment GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields on GustoFfeFeatureResult {
+  __typename
+  entityId
+  entityType
+  featureFlagKey
+  featureVariables {
+    __typename
+    ... on StringFeatureVariable {
+      stringVariableValue: variableValue
+      variableKey
+      __typename
+    }
+    ... on IntFeatureVariable {
+      intVariableValue: variableValue
+      variableKey
+      __typename
+    }
+    ... on FloatFeatureVariable {
+      floatVariableValue: variableValue
+      variableKey
+      __typename
+    }
+    ... on BooleanFeatureVariable {
+      booleanVariableValue: variableValue
+      variableKey
+      __typename
+    }
+    ... on JsonFeatureVariable {
+      jsonVariableValue: variableValue
+      variableKey
+      __typename
+    }
+  }
+  isFeatureEnabled
+  projectEntity
+  variationName
+}

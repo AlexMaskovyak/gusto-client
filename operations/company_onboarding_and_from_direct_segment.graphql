@@ -1,0 +1,13 @@
+query CompanyOnboardingAndFromDirectSegment {
+  company {
+    ...CompanyOnboardingAndFromDirectSegmentFields
+    __typename
+  }
+}
+
+fragment CompanyOnboardingAndFromDirectSegmentFields on Company {
+  id
+  fromDirectSegment
+  hasBecomePayingCustomer
+  __typename
+}

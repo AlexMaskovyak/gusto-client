@@ -1,0 +1,46 @@
+{
+  "generator": "browser-sourced-api-client-generator",
+  "generatorVersion": "0.1.0",
+  "generationMode": "operation-documents",
+  "schemaValidated": false,
+  "responseModels": "JSON dictionaries",
+  "operations": [
+    "CompanyHasBecomePayingCustomer",
+    "CompanyOnboardingAndFromDirectSegment",
+    "CreateMemberExpense",
+    "DashboardApisCompanyIsGusEnabled",
+    "DashboardApisUseCurrentCompanySubscriptions",
+    "FirmLogo",
+    "GetCurrentCompanyOnboardingExperienceType",
+    "GustoFfe",
+    "MemberExpenses",
+    "MobileAppGrowthUpsell",
+    "ReferralsNavLinkContainer",
+    "SupportPage",
+    "TopBarCompany",
+    "UpdateMemberExpense",
+    "UseAdminOverrideRedirect"
+  ],
+  "operationsSha256": "eb3359766e11a48bfa72610006098090db6e7a7a0477a9890e5aa636195b5d28",
+  "operationDocumentSha256": {
+    "CompanyHasBecomePayingCustomer": "9cad3d9947bc56a72263a21712684dac88f502cba035304b563c1e5455392b3d",
+    "CompanyOnboardingAndFromDirectSegment": "ade024c34f36b2cf21fb408d6b8726c0d120ddb168d587ceda11cfd0d48c55a9",
+    "CreateMemberExpense": "8bc4bed285f995451ad5417d22fa4cb07631235fa5d2053078e0a194a0f7947a",
+    "DashboardApisCompanyIsGusEnabled": "2515093fa433df081b7c2b8a95a6148f539f1cab6866b4ff62df0c4a845d8bb9",
+    "DashboardApisUseCurrentCompanySubscriptions": "f3475913d2a7ec8541044393f5505aa4687885aee30a804d09e024338703190e",
+    "FirmLogo": "9b427ceeb93b4ea3ca9edce3043aacb48e83ce69bfb7cf2ba236892d8cb07ad9",
+    "GetCurrentCompanyOnboardingExperienceType": "14ba3f7f11e599dd2df913e5063c51566db6823d3c36100f8be1a43d4d17a8c0",
+    "GustoFfe": "166b4f1d6fafd1e3e824fe78af7d55c0b02952d09569b62602b8a185ae1c80e3",
+    "MemberExpenses": "895a15d49882b59ebc1e93239055575e7372e52513f4ecb54f16161fa9b8884a",
+    "MobileAppGrowthUpsell": "0d033a147eab3934e8cf3df8135d00ab28206f957f0a8f8d3ba08042adab1722",
+    "ReferralsNavLinkContainer": "0f65400ef56f4288eeb2f0f76f57dc32b935bb1e40e158e2aa7bb695b9d9b4ac",
+    "SupportPage": "b41c86e94d001915d5499fca438b64f98d5960884815818ad12e5f6ae50354e8",
+    "TopBarCompany": "17e20c40083e96f183a2479262ad3c591289f546aeb62680686f8e5f8ebd63fe",
+    "UpdateMemberExpense": "e6666a529b440d8322fe6ab778931ad4e533eb2cac9766d8a91689166cafc65c",
+    "UseAdminOverrideRedirect": "045a230fa9911c9b9c96b67d5695a331b1d084d0a335cf4f90dfbd084c0ebc6c"
+  },
+  "liveVerified": false,
+  "limitations": [
+    "Unknown custom input fields and response types require an optional schema or service validation."
+  ]
+}

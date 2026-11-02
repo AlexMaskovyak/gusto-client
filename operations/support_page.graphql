@@ -1,0 +1,217 @@
+query SupportPage($canReadCompanyAddresses: Boolean!, $companyId: ID!, $featureFlagInputs: [GustoFfeFeatureInput!]!, $isAccountant: Boolean!, $isPayrollAdmin: Boolean!) {
+  accountant @include(if: $isAccountant) {
+    id
+    accountingFirm {
+      id
+      partnerProgramInfo {
+        currentLevel
+        discountedClientsCount
+        __typename
+      }
+      phone
+      __typename
+    }
+    email
+    firstName
+    lastName
+    phone
+    __typename
+  }
+  company {
+    id
+    dedicatedSupportContact @include(if: $isPayrollAdmin) {
+      id
+      __typename
+    }
+    dsaChatEnabled @include(if: $isPayrollAdmin)
+    filingAddress @include(if: $canReadCompanyAddresses) {
+      id
+      state
+      __typename
+    }
+    fractionalHrPartners @include(if: $isPayrollAdmin) {
+      id
+      email
+      name
+      __typename
+    }
+    hasRunPayroll @include(if: $isPayrollAdmin)
+    isApproved
+    isEmbeddedPayrollCompany
+    isOnboarding
+    isSuspended
+    premiumFreeTrialStatus @include(if: $isPayrollAdmin) {
+      daysRemaining
+      onTrial
+      __typename
+    }
+    __typename
+  }
+  currentUser @include(if: $isPayrollAdmin) {
+    id
+    isHrSupportCenterUser(companyId: $companyId)
+    __typename
+  }
+  currentUserRole @include(if: $isPayrollAdmin) {
+    id
+    phone
+    __typename
+  }
+  employee {
+    id
+    nextPayDay
+    __typename
+  }
+  gustoFfeFeatures(input: $featureFlagInputs) {
+    ...GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields
+    __typename
+  }
+  member {
+    id
+    currentHomeLocation {
+      id
+      country
+      __typename
+    }
+    currentWorkLocation {
+      id
+      country
+      __typename
+    }
+    __typename
+  }
+  supportInfo {
+    id
+    emailRestrictionEnabled
+    miawIdentityToken
+    phoneNumber
+    prioritySupport
+    ...DefaultQuickActions
+    ...HoopData
+    ...SearchOptions
+    ...TechnicalAccountManager
+    __typename
+  }
+}
+
+fragment DefaultQuickActions on SupportInfo {
+  defaultQuickActions {
+    chatSkill
+    href
+    keywords
+    phoneSkill
+    tagIconType
+    tagText
+    title
+    __typename
+  }
+  __typename
+}
+
+fragment GustoFeatureFlagExperimentationFeatureEnabledAndVariableFields on GustoFfeFeatureResult {
+  __typename
+  entityId
+  entityType
+  featureFlagKey
+  featureVariables {
+    __typename
+    ... on StringFeatureVariable {
+      stringVariableValue: variableValue
+      variableKey
+      __typename
+    }
+    ... on IntFeatureVariable {
+      intVariableValue: variableValue
+      variableKey
+      __typename
+    }
+    ... on FloatFeatureVariable {
+      floatVariableValue: variableValue
+      variableKey
+      __typename
+    }
+    ... on BooleanFeatureVariable {
+      booleanVariableValue: variableValue
+      variableKey
+      __typename
+    }
+    ... on JsonFeatureVariable {
+      jsonVariableValue: variableValue
+      variableKey
+      __typename
+    }
+  }
+  isFeatureEnabled
+  projectEntity
+  variationName
+}
+
+fragment HoopData on SupportInfo {
+  id
+  closures {
+    channelName
+    daysClosed
+    endAt
+    eventTitle
+    returnAt
+    startAt
+    teamName
+    __typename
+  }
+  hoop {
+    channel
+    supportTeam
+    weeklyHours {
+      closeAt
+      isClosed
+      isHoliday
+      openAt
+      weekdayIndex
+      __typename
+    }
+    __typename
+  }
+  nextAvailableHoop
+  supportTeamForUserRole
+  __typename
+}
+
+fragment SearchOptions on SupportInfo {
+  searchOptions {
+    popularSearchOptions {
+      label
+      value
+      __typename
+    }
+    suggestedSearchOptions {
+      label
+      value
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment TechnicalAccountManager on SupportInfo {
+  dsaAvailableForLiveChat
+  salesAccountManager {
+    email
+    firstName
+    lastName
+    phoneExtension
+    salesforceAccountId
+    salesforceResellerAccountId
+    __typename
+  }
+  technicalAccountManager {
+    email
+    firstName
+    lastName
+    phoneExtension
+    salesforceAccountId
+    salesforceResellerAccountId
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,58 @@
+mutation UpdateMemberExpense($input: UpdateMemberExpenseInput!) {
+  payload: updateMemberExpense(input: $input) {
+    errors {
+      argument
+      message
+    }
+    expense {
+      ...Expense
+    }
+  }
+}
+
+fragment Expense on OneTimeReimbursement {
+  id
+  amount
+  approvedBy
+  categoryName
+  categoryUuid
+  checkDate
+  createdAt
+  currency
+  description
+  displayName
+  eorOneTimeReimbursement {
+    id
+    category
+    title
+  }
+  member {
+    id
+    latestEmployment {
+      id
+      isEor
+      workerType
+    }
+    preferredFullName
+  }
+  purchaseDate
+  rateData {
+    amount
+    categoryRateUuid
+    name
+    rateBaseKind
+    rateConversionAmount
+  }
+  receipt {
+    id
+    contentType
+    name
+    url
+  }
+  status
+  statusReason
+  vendor {
+    id
+    name
+  }
+}
