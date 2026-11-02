@@ -235,6 +235,24 @@
       "sha256": "17e20c40083e96f183a2479262ad3c591289f546aeb62680686f8e5f8ebd63fe"
     },
     {
+      "content": "mutation UpdateMemberExpense($input: UpdateMemberExpenseInput!) {\n  payload: updateMemberExpense(input: $input) {\n    errors {\n      argument\n      message\n    }\n    expense {\n      ...Expense\n    }\n  }\n}\n\nfragment Expense on OneTimeReimbursement {\n  id\n  amount\n  approvedBy\n  categoryName\n  categoryUuid\n  checkDate\n  createdAt\n  currency\n  description\n  displayName\n  eorOneTimeReimbursement {\n    id\n    category\n    title\n  }\n  member {\n    id\n    latestEmployment {\n      id\n      isEor\n      workerType\n    }\n    preferredFullName\n  }\n  purchaseDate\n  rateData {\n    amount\n    categoryRateUuid\n    name\n    rateBaseKind\n    rateConversionAmount\n  }\n  receipt {\n    id\n    contentType\n    name\n    url\n  }\n  status\n  statusReason\n  vendor {\n    id\n    name\n  }\n}\n",
+      "id": "artifact-cb184c40d23a4a55e80a590efeed293944b1a2a3e3ece6f542cddf70809085b1",
+      "kind": "graphql-operations",
+      "name": "UpdateMemberExpense.graphql",
+      "provenance": {
+        "derivedFrom": [],
+        "locations": [],
+        "producers": [
+          {
+            "name": "website-client",
+            "version": "0.1.0"
+          }
+        ],
+        "source": "external"
+      },
+      "sha256": "e6666a529b440d8322fe6ab778931ad4e533eb2cac9766d8a91689166cafc65c"
+    },
+    {
       "content": "query UseAdminOverrideRedirect {\n  company {\n    id\n    companyOnboardingMigration {\n      id\n      migrationState\n      migrationType\n      __typename\n    }\n    __typename\n  }\n  payrollAdmin {\n    id\n    currentRoleNeedsSelfOnboarding\n    currentRoleNeedsSelfOnboardingWelcome\n    __typename\n  }\n}\n",
       "id": "artifact-1c55616f1f750427d6a2c320c35751d76b58ba27ad1011207f0c3a51fa3b733c",
       "kind": "graphql-operations",
@@ -269,9 +287,27 @@
         "source": "external"
       },
       "sha256": "3d1fc63d3bf37e0367f7dc1230c0313846bc013b096b172ecd98c2116c2f3753"
+    },
+    {
+      "content": "{\n  \"format\": \"website-client-upload-workflows\",\n  \"version\": 1,\n  \"workflows\": [\n    {\n      \"apiEndpoint\": \"https://graphql.app.gusto.com/\",\n      \"attachmentField\": \"fileId\",\n      \"evidence\": [\n        \"55af6d22b17379618a488095ac0e1eac28814b78616ba976eb515ee11b90ada0\",\n        \"63fbab8e2d410848f4fa7336a6acc36063f703e1a51535308a54ee93834daaf5\",\n        \"b31bdc441ce1f6ed963412b8c2a255e78d59e9bae575e492a9845a1361980796\"\n      ],\n      \"inputVariable\": \"input\",\n      \"maxBytes\": 15000000,\n      \"metadataEndpoint\": \"https://app.gusto.com/rails/active_storage/direct_uploads\",\n      \"operation\": \"CreateMemberExpense\",\n      \"protocol\": \"rails-active-storage-v1\"\n    },\n    {\n      \"apiEndpoint\": \"https://graphql.app.gusto.com/\",\n      \"attachmentField\": \"fileId\",\n      \"evidence\": [\n        \"55af6d22b17379618a488095ac0e1eac28814b78616ba976eb515ee11b90ada0\",\n        \"63fbab8e2d410848f4fa7336a6acc36063f703e1a51535308a54ee93834daaf5\",\n        \"b31bdc441ce1f6ed963412b8c2a255e78d59e9bae575e492a9845a1361980796\"\n      ],\n      \"inputVariable\": \"input\",\n      \"maxBytes\": 15000000,\n      \"metadataEndpoint\": \"https://app.gusto.com/rails/active_storage/direct_uploads\",\n      \"operation\": \"UpdateMemberExpense\",\n      \"protocol\": \"rails-active-storage-v1\"\n    }\n  ]\n}\n",
+      "id": "artifact-2026a411414400d66b53de036bbbbb874e1c5cd19cc0e543e55e1bd84cb0a4da",
+      "kind": "report",
+      "name": "upload-workflows.json",
+      "provenance": {
+        "derivedFrom": [],
+        "locations": [],
+        "producers": [
+          {
+            "name": "website-client",
+            "version": "0.1.0"
+          }
+        ],
+        "source": "external"
+      },
+      "sha256": "0d952efc6b4168d96227deb522a738ec37edf693819fbe1c89efcee8554da6ad"
     }
   ],
-  "createdAt": "2026-11-02T02:57:12.275842+00:00",
+  "createdAt": "2026-11-02T03:34:31.409162+00:00",
   "format": "website-client-discovery",
   "producer": {
     "name": "website-client",
@@ -296,6 +332,7 @@
         "artifact-2c1ec5efdd25b5951aacee629fe97239cfd802a7443684dbae788d5993d86e55",
         "artifact-9388f6690ca7d96a8b574dcaf3218c4469e76bb87fcfd3fde16ffc71485ea3fc",
         "artifact-42ed2680904bfe971d2c1a90f900892c72d50acddae620ca329c132d54474e85",
+        "artifact-cb184c40d23a4a55e80a590efeed293944b1a2a3e3ece6f542cddf70809085b1",
         "artifact-1c55616f1f750427d6a2c320c35751d76b58ba27ad1011207f0c3a51fa3b733c"
       ],
       "protocol": "graphql",

@@ -281,6 +281,29 @@ class Client(OperationClient):
         values = {'isPayrollAdmin': isPayrollAdmin}
         return self._execute('TopBarCompany', {key: value for key, value in values.items() if value is not UNSET})
 
+    def update_member_expense(self, *, input: Any) -> dict[str, Any]:
+        """Send the GraphQL mutation UpdateMemberExpense.
+        
+        Requires a client constructed with allow_writes=True.
+        
+        Args:
+            input: GraphQL $input: UpdateMemberExpenseInput!. Required.
+        
+        Returns:
+            The response's data object as a JSON dictionary. Response fields and
+            custom input fields are not validated without a server schema.
+        
+        Raises:
+            ValueError: Declared variables are invalid or mutation permission is missing.
+            OperationError: The server returns a non-success HTTP status.
+            RuntimeError: The response is oversized, invalid JSON or contains GraphQL errors.
+            httpx.HTTPError: The HTTP transport fails. Browser login can raise BrowserError.
+        
+        No automatic retry occurs. Check the service before retrying an uncertain write.
+        """
+        values = {'input': input}
+        return self._execute('UpdateMemberExpense', {key: value for key, value in values.items() if value is not UNSET})
+
     def use_admin_override_redirect(self) -> dict[str, Any]:
         """Run the GraphQL query UseAdminOverrideRedirect.
         
@@ -298,3 +321,28 @@ class Client(OperationClient):
         """
         values = {}
         return self._execute('UseAdminOverrideRedirect', {key: value for key, value in values.items() if value is not UNSET})
+
+    def create_member_expense_with_file(self, *, receipt_path, metadata_client=None, storage_client=None, **arguments):
+        """Upload a file and call CreateMemberExpense once with its discovered attachment field.
+
+        Requires allow_writes=True. arguments are the original operation variables.
+        metadata_client authenticates the application upload endpoint. Storage must
+        be credential-free. No stage retries; check the service after an uncertain
+        failure before submitting again. See upload_runtime.submit_with_file.
+        """
+        from .upload_runtime import submit_with_file
+        return submit_with_file(self, 'CreateMemberExpense', arguments, {'operation': 'CreateMemberExpense', 'apiEndpoint': 'https://graphql.app.gusto.com/', 'metadataEndpoint': 'https://app.gusto.com/rails/active_storage/direct_uploads', 'inputVariable': 'input', 'attachmentField': 'fileId', 'evidence': ['55af6d22b17379618a488095ac0e1eac28814b78616ba976eb515ee11b90ada0', '63fbab8e2d410848f4fa7336a6acc36063f703e1a51535308a54ee93834daaf5', 'b31bdc441ce1f6ed963412b8c2a255e78d59e9bae575e492a9845a1361980796'], 'protocol': 'rails-active-storage-v1', 'maxBytes': 15000000}, receipt_path,
+                                metadata_client=metadata_client, storage_client=storage_client)
+
+
+    def update_member_expense_with_file(self, *, receipt_path, metadata_client=None, storage_client=None, **arguments):
+        """Upload a file and call UpdateMemberExpense once with its discovered attachment field.
+
+        Requires allow_writes=True. arguments are the original operation variables.
+        metadata_client authenticates the application upload endpoint. Storage must
+        be credential-free. No stage retries; check the service after an uncertain
+        failure before submitting again. See upload_runtime.submit_with_file.
+        """
+        from .upload_runtime import submit_with_file
+        return submit_with_file(self, 'UpdateMemberExpense', arguments, {'operation': 'UpdateMemberExpense', 'apiEndpoint': 'https://graphql.app.gusto.com/', 'metadataEndpoint': 'https://app.gusto.com/rails/active_storage/direct_uploads', 'inputVariable': 'input', 'attachmentField': 'fileId', 'evidence': ['55af6d22b17379618a488095ac0e1eac28814b78616ba976eb515ee11b90ada0', '63fbab8e2d410848f4fa7336a6acc36063f703e1a51535308a54ee93834daaf5', 'b31bdc441ce1f6ed963412b8c2a255e78d59e9bae575e492a9845a1361980796'], 'protocol': 'rails-active-storage-v1', 'maxBytes': 15000000}, receipt_path,
+                                metadata_client=metadata_client, storage_client=storage_client)

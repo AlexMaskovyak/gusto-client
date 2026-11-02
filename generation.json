@@ -18,9 +18,10 @@
     "ReferralsNavLinkContainer",
     "SupportPage",
     "TopBarCompany",
+    "UpdateMemberExpense",
     "UseAdminOverrideRedirect"
   ],
-  "operationsSha256": "dc20231dca1dbc317f6fb78e670eca822673169c8256448f094ecf1982baa129",
+  "operationsSha256": "eb3359766e11a48bfa72610006098090db6e7a7a0477a9890e5aa636195b5d28",
   "operationDocumentSha256": {
     "CompanyHasBecomePayingCustomer": "9cad3d9947bc56a72263a21712684dac88f502cba035304b563c1e5455392b3d",
     "CompanyOnboardingAndFromDirectSegment": "ade024c34f36b2cf21fb408d6b8726c0d120ddb168d587ceda11cfd0d48c55a9",
@@ -35,6 +36,7 @@
     "ReferralsNavLinkContainer": "0f65400ef56f4288eeb2f0f76f57dc32b935bb1e40e158e2aa7bb695b9d9b4ac",
     "SupportPage": "b41c86e94d001915d5499fca438b64f98d5960884815818ad12e5f6ae50354e8",
     "TopBarCompany": "17e20c40083e96f183a2479262ad3c591289f546aeb62680686f8e5f8ebd63fe",
+    "UpdateMemberExpense": "e6666a529b440d8322fe6ab778931ad4e533eb2cac9766d8a91689166cafc65c",
     "UseAdminOverrideRedirect": "045a230fa9911c9b9c96b67d5695a331b1d084d0a335cf4f90dfbd084c0ebc6c"
   },
   "liveVerified": false,

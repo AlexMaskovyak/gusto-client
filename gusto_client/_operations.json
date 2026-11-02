@@ -44,7 +44,21 @@
         "required": true
       }
     ],
-    "description": "Captured GraphQL mutation; complete schema not required."
+    "description": "Captured GraphQL mutation; complete schema not required.",
+    "fileUpload": {
+      "operation": "CreateMemberExpense",
+      "apiEndpoint": "https://graphql.app.gusto.com/",
+      "metadataEndpoint": "https://app.gusto.com/rails/active_storage/direct_uploads",
+      "inputVariable": "input",
+      "attachmentField": "fileId",
+      "evidence": [
+        "55af6d22b17379618a488095ac0e1eac28814b78616ba976eb515ee11b90ada0",
+        "63fbab8e2d410848f4fa7336a6acc36063f703e1a51535308a54ee93834daaf5",
+        "b31bdc441ce1f6ed963412b8c2a255e78d59e9bae575e492a9845a1361980796"
+      ],
+      "protocol": "rails-active-storage-v1",
+      "maxBytes": 15000000
+    }
   },
   "DashboardApisCompanyIsGusEnabled": {
     "kind": "graphql-operation",
@@ -262,6 +276,38 @@
       }
     ],
     "description": "Captured GraphQL query; complete schema not required."
+  },
+  "UpdateMemberExpense": {
+    "kind": "graphql-operation",
+    "method": "update_member_expense",
+    "httpMethod": "POST",
+    "operationNameInUrl": false,
+    "requestStyleObserved": false,
+    "write": true,
+    "document": "mutation UpdateMemberExpense($input: UpdateMemberExpenseInput!) {\n  payload: updateMemberExpense(input: $input) {\n    errors {\n      argument\n      message\n    }\n    expense {\n      ...Expense\n    }\n  }\n}\n\nfragment Expense on OneTimeReimbursement {\n  id\n  amount\n  approvedBy\n  categoryName\n  categoryUuid\n  checkDate\n  createdAt\n  currency\n  description\n  displayName\n  eorOneTimeReimbursement {\n    id\n    category\n    title\n  }\n  member {\n    id\n    latestEmployment {\n      id\n      isEor\n      workerType\n    }\n    preferredFullName\n  }\n  purchaseDate\n  rateData {\n    amount\n    categoryRateUuid\n    name\n    rateBaseKind\n    rateConversionAmount\n  }\n  receipt {\n    id\n    contentType\n    name\n    url\n  }\n  status\n  statusReason\n  vendor {\n    id\n    name\n  }\n}\n",
+    "variables": [
+      {
+        "name": "input",
+        "parameter": "input",
+        "type": "UpdateMemberExpenseInput!",
+        "required": true
+      }
+    ],
+    "description": "Captured GraphQL mutation; complete schema not required.",
+    "fileUpload": {
+      "operation": "UpdateMemberExpense",
+      "apiEndpoint": "https://graphql.app.gusto.com/",
+      "metadataEndpoint": "https://app.gusto.com/rails/active_storage/direct_uploads",
+      "inputVariable": "input",
+      "attachmentField": "fileId",
+      "evidence": [
+        "55af6d22b17379618a488095ac0e1eac28814b78616ba976eb515ee11b90ada0",
+        "63fbab8e2d410848f4fa7336a6acc36063f703e1a51535308a54ee93834daaf5",
+        "b31bdc441ce1f6ed963412b8c2a255e78d59e9bae575e492a9845a1361980796"
+      ],
+      "protocol": "rails-active-storage-v1",
+      "maxBytes": 15000000
+    }
   },
   "UseAdminOverrideRedirect": {
     "kind": "graphql-operation",

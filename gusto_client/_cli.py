@@ -38,6 +38,8 @@ SAFE_INPUT_ERROR_PREFIXES = (
     "Output already exists",
     "Input exceeds",
     "Input must",
+    "Receipt ",
+    "Upload preview ",
     "Headers exceed",
     "Invalid runtime",
     "Input has unknown",
@@ -254,12 +256,15 @@ def build_parser(operations, defaults=None):
             ),
         )
         add_operation_arguments(command, defaults)
+        if operation.get("fileUpload"):
+            command.add_argument("--preview", action="store_true", help="Validate the receipt and show the planned upload/mutation locally. Sends no requests and needs no write confirmation.")
+            command.add_argument("--receipt", help="Local file to upload and attach before this mutation. Requires write confirmation; performs metadata POST, exact-byte storage PUT, then the mutation once.")
     return parser, functions
 
 
 def validate_execution_options(options, operation):
     """Reject invalid inputs and unconfirmed writes before opening a browser."""
-    if operation["write"] and options.confirm_write != options.operation:
+    if operation["write"] and options.confirm_write != options.operation and not getattr(options, "preview", False):
         raise ValueError("This write requires --confirm-write " + options.operation)
     if options.login and options.headers_stdin:
         raise ValueError("Browser login cannot be combined with --headers-stdin")
@@ -425,6 +430,28 @@ def execute_operation(options, operation, function, arguments, headers, state):
                 return {"status": int(response.status_code)}
             return response.parsed
 
+        if getattr(options, "receipt", None):
+            from .upload_runtime import submit_with_file
+            workflow = operation["fileUpload"]
+            metadata_client = None
+            if transport is not None:
+                from .browser import origin
+                from .session_http import BrowserLoginTransport
+                if origin(workflow["metadataEndpoint"]) != origin(options.login_url):
+                    raise ValueError("Upload metadata must belong to the signed-in application.")
+                selected = dict(transport._headers)
+                page = transport._session._page
+                token = page.locator('meta[name="csrf-token"]')
+                if token.count() == 1:
+                    value = token.get_attribute("content")
+                    if value:
+                        selected["x-csrf-token"] = value
+                metadata_transport = stack.enter_context(BrowserLoginTransport.for_session(
+                    transport._session, workflow["metadataEndpoint"], "POST", selected))
+                import httpx
+                metadata_client = stack.enter_context(httpx.Client(transport=metadata_transport, follow_redirects=False))
+            return submit_with_file(client, options.operation, arguments, workflow, options.prepared_file,
+                                    metadata_client=metadata_client)
         method = getattr(client, operation["method"])
         return method(**arguments)
 
@@ -463,6 +490,13 @@ def show_failure(error, state):
             "No automatic retry occurred; check the service before retrying.",
             file=sys.stderr,
         )
+    elif type(error).__name__ == "FileWriteError":
+        stage = getattr(error, "stage", "unknown")
+        stage = stage if stage in {"metadata", "storage", "mutation"} else "unknown"
+        outcome = "rejected" if getattr(error, "outcome", None) == "rejected" else "unknown"
+        uploaded = getattr(error, "uploaded", None) is True
+        print(f"File-backed write failed at {stage}; outcome={outcome}; file_uploaded={uploaded}. "
+              "No automatic retry occurred. Check the service before retrying.", file=sys.stderr)
     elif type(error).__name__ == "BrowserError":
         print(str(error), file=sys.stderr)
     elif not state.started:
@@ -499,6 +533,8 @@ def main(args=None):
 
     try:
         validate_execution_options(options, operation)
+        if getattr(options, "preview", False) and not getattr(options, "receipt", None):
+            raise ValueError("Upload preview requires --receipt FILE.")
         data = read_input_json(options.input)
         headers = read_runtime_headers(options.headers_stdin)
         arguments = bind_input_arguments(function, data)
@@ -506,6 +542,23 @@ def main(args=None):
             from .operation_runtime import validate_arguments
 
             validate_arguments(__package__, options.operation, arguments)
+        if getattr(options, "receipt", None):
+            from .upload_runtime import prepare_file
+            workflow = operation["fileUpload"]
+            if options.url != workflow["apiEndpoint"] or not isinstance(arguments.get(workflow["inputVariable"]), dict) or workflow["attachmentField"] in arguments[workflow["inputVariable"]]:
+                raise ValueError("Receipt input must use its discovered API and omit the attachment field.")
+            if not options.login and not getattr(options, "preview", False) and urlsplit(workflow["metadataEndpoint"]).netloc != urlsplit(options.url).netloc:
+                raise ValueError("Receipt uploads to a separate application origin require --login.")
+            options.prepared_file = prepare_file(options.receipt, workflow["maxBytes"])
+            if getattr(options, "preview", False):
+                receipt = options.prepared_file
+                write_result({"preview": True, "requestsSent": 0, "operation": options.operation,
+                              "apiEndpoint": options.url, "metadataEndpoint": workflow["metadataEndpoint"],
+                              "protocol": workflow["protocol"], "variables": arguments,
+                              "attachmentField": workflow["inputVariable"] + "." + workflow["attachmentField"],
+                              "receipt": {"name": receipt.name, "bytes": len(receipt.data), "sha256": receipt.sha256,
+                                          "contentType": receipt.content_type}}, options.output)
+                return 0
         result = execute_operation(
             options, operation, function, arguments, headers, state
         )

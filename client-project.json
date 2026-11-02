@@ -14,7 +14,9 @@
   "lockfile": "poetry.lock",
   "allowInferred": false,
   "requiredOperations": [
-    "CreateMemberExpense",
     "MemberExpenses"
+  ],
+  "requiredUploads": [
+    "CreateMemberExpense"
   ]
 }

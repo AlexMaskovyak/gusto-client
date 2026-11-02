@@ -1,6 +1,6 @@
 # gusto-client
 
-Python methods and CLI commands generated from 14 API operations.
+Python methods and CLI commands generated from 15 API operations.
 The generator produced every file in this project. No service-specific source
 patches are needed. This operation set does not imply coverage of every service API.
 
@@ -41,8 +41,13 @@ the application request and update `client-project.json` if its contract changes
 For operations with inputs, create a JSON object using the names/types in that
 operation's help and pass `--input FILE`. Write commands require
 `--confirm-write OPERATION` with the exact operation name. No automatic retries occur. Check the service before
-retrying an uncertain write. Receipt uploads, pagination and other multi-step
-workflows require their own captured operations and orchestration.
+retrying an uncertain write. Operations with a discovered file-upload contract
+accept `--receipt FILE`: metadata upload, exact-byte storage upload and mutation
+run within one login. Supply the original input object without its attachment
+field. Python callers use the generated `<method>_with_file` helper and an
+authenticated metadata client when the application origin differs from the API.
+Unsupported upload protocols and operations without a discovered contract do not
+accept this flag. Pagination and other multi-step workflows remain separate.
 
 ## Reproduce this project
 
@@ -66,3 +71,34 @@ Declared standard scalar types are validated; custom input fields and response s
 The service remains authoritative for its records. Generation and
 synthetic tests do not verify submissions or payment. HTTP failures report status
 without response bodies. Authentication stays in browser/process memory.
+
+## Submit with a file
+
+The `CreateMemberExpense` command supports `rails-active-storage-v1`. Prepare its original
+JSON input using the command's help and the application's actual fields. Omit
+`input.fileId`: the upload supplies it.
+A server schema is needed to validate fields inside a custom input object.
+
+The following examples assume `input.json` contains that verified input and
+`receipt.pdf` is your existing local file. Replace those paths as needed.
+Preview validates the file and prints its hash, variables and target endpoints;
+it sends no requests and needs no login or write confirmation:
+
+```sh
+poetry run gusto-client CreateMemberExpense --input input.json --receipt receipt.pdf --preview
+```
+
+After reviewing the preview, this command uploads the file and changes remote data:
+
+```sh
+poetry run gusto-client CreateMemberExpense --input input.json --receipt receipt.pdf --login --confirm-write CreateMemberExpense
+```
+
+One login covers all three stages. Python callers use
+`Client.create_member_expense_with_file(receipt_path=..., metadata_client=..., **arguments)`
+with `allow_writes=True`; supply an application-authenticated metadata client when
+its origin differs from the API. Storage stays credential-free. No stage retries.
+A failed creation can leave an unattached file. Check the application after an
+uncertain result before submitting again. File contracts are inferred source
+evidence; they do not prove live service acceptance or reimbursement.
+
