@@ -7,6 +7,7 @@
   "operations": [
     "CompanyHasBecomePayingCustomer",
     "CompanyOnboardingAndFromDirectSegment",
+    "CreateMemberExpense",
     "DashboardApisCompanyIsGusEnabled",
     "DashboardApisUseCurrentCompanySubscriptions",
     "FirmLogo",
@@ -19,10 +20,11 @@
     "TopBarCompany",
     "UseAdminOverrideRedirect"
   ],
-  "operationsSha256": "a5a808edd1c16d11ba25b579e00b33c823aabf2be059e6dc83a94f79e09796ab",
+  "operationsSha256": "dc20231dca1dbc317f6fb78e670eca822673169c8256448f094ecf1982baa129",
   "operationDocumentSha256": {
     "CompanyHasBecomePayingCustomer": "9cad3d9947bc56a72263a21712684dac88f502cba035304b563c1e5455392b3d",
     "CompanyOnboardingAndFromDirectSegment": "ade024c34f36b2cf21fb408d6b8726c0d120ddb168d587ceda11cfd0d48c55a9",
+    "CreateMemberExpense": "8bc4bed285f995451ad5417d22fa4cb07631235fa5d2053078e0a194a0f7947a",
     "DashboardApisCompanyIsGusEnabled": "2515093fa433df081b7c2b8a95a6148f539f1cab6866b4ff62df0c4a845d8bb9",
     "DashboardApisUseCurrentCompanySubscriptions": "f3475913d2a7ec8541044393f5505aa4687885aee30a804d09e024338703190e",
     "FirmLogo": "9b427ceeb93b4ea3ca9edce3043aacb48e83ce69bfb7cf2ba236892d8cb07ad9",

@@ -37,6 +37,24 @@
       "sha256": "ade024c34f36b2cf21fb408d6b8726c0d120ddb168d587ceda11cfd0d48c55a9"
     },
     {
+      "content": "mutation CreateMemberExpense($input: CreateMemberExpenseInput!) {\n  payload: createMemberExpense(input: $input) {\n    errors {\n      argument\n      message\n    }\n    oneTimeReimbursement {\n      ...TeamExpense\n    }\n  }\n}\n\nfragment Expense on OneTimeReimbursement {\n  id\n  amount\n  approvedBy\n  categoryName\n  categoryUuid\n  checkDate\n  createdAt\n  currency\n  description\n  displayName\n  eorOneTimeReimbursement {\n    id\n    category\n    title\n  }\n  member {\n    id\n    latestEmployment {\n      id\n      isEor\n      workerType\n    }\n    preferredFullName\n  }\n  purchaseDate\n  rateData {\n    amount\n    categoryRateUuid\n    name\n    rateBaseKind\n    rateConversionAmount\n  }\n  receipt {\n    id\n    contentType\n    name\n    url\n  }\n  status\n  statusReason\n  vendor {\n    id\n    name\n  }\n}\n\nfragment TeamExpense on OneTimeReimbursement {\n  availableActions\n  ...Expense\n}\n",
+      "id": "artifact-83888155ea280dd470ac9a672c05fbf1ebc81df72c169892053328de53008249",
+      "kind": "graphql-operations",
+      "name": "CreateMemberExpense.graphql",
+      "provenance": {
+        "derivedFrom": [],
+        "locations": [],
+        "producers": [
+          {
+            "name": "website-client",
+            "version": "0.1.0"
+          }
+        ],
+        "source": "external"
+      },
+      "sha256": "8bc4bed285f995451ad5417d22fa4cb07631235fa5d2053078e0a194a0f7947a"
+    },
+    {
       "content": "query DashboardApisCompanyIsGusEnabled {\n  company {\n    id\n    isGusEnabled\n    __typename\n  }\n}\n",
       "id": "artifact-3c855838ec55ad10c2f585117b95c8e6057da64b1085691d19fe78e7dac4cb26",
       "kind": "graphql-operations",
@@ -253,7 +271,7 @@
       "sha256": "3d1fc63d3bf37e0367f7dc1230c0313846bc013b096b172ecd98c2116c2f3753"
     }
   ],
-  "createdAt": "2026-11-02T01:58:32.401246+00:00",
+  "createdAt": "2026-11-02T02:57:12.275842+00:00",
   "format": "website-client-discovery",
   "producer": {
     "name": "website-client",
@@ -267,6 +285,7 @@
       "operationArtifacts": [
         "artifact-bc48f19fbdc02477ac2d40f4b20bb9a1c26bfd82a7a6f9ff8c39ef9bee535f9c",
         "artifact-6c97fbc263026fb5703f18169e61c4048fe4debaf27c6f4f02458f9c848d7bee",
+        "artifact-83888155ea280dd470ac9a672c05fbf1ebc81df72c169892053328de53008249",
         "artifact-3c855838ec55ad10c2f585117b95c8e6057da64b1085691d19fe78e7dac4cb26",
         "artifact-2541ad07ffc6ca8a453dc4b375193b71a9f0ea93914a05fbf67d54e0e6b25ac6",
         "artifact-482613aa527b3ef604986875beae409c536bbb5e873aa20a499f736cf78e0d39",

@@ -51,6 +51,29 @@ class Client(OperationClient):
         values = {}
         return self._execute('CompanyOnboardingAndFromDirectSegment', {key: value for key, value in values.items() if value is not UNSET})
 
+    def create_member_expense(self, *, input: Any) -> dict[str, Any]:
+        """Send the GraphQL mutation CreateMemberExpense.
+        
+        Requires a client constructed with allow_writes=True.
+        
+        Args:
+            input: GraphQL $input: CreateMemberExpenseInput!. Required.
+        
+        Returns:
+            The response's data object as a JSON dictionary. Response fields and
+            custom input fields are not validated without a server schema.
+        
+        Raises:
+            ValueError: Declared variables are invalid or mutation permission is missing.
+            OperationError: The server returns a non-success HTTP status.
+            RuntimeError: The response is oversized, invalid JSON or contains GraphQL errors.
+            httpx.HTTPError: The HTTP transport fails. Browser login can raise BrowserError.
+        
+        No automatic retry occurs. Check the service before retrying an uncertain write.
+        """
+        values = {'input': input}
+        return self._execute('CreateMemberExpense', {key: value for key, value in values.items() if value is not UNSET})
+
     def dashboard_apis_company_is_gus_enabled(self) -> dict[str, Any]:
         """Run the GraphQL query DashboardApisCompanyIsGusEnabled.
         

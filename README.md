@@ -1,6 +1,6 @@
 # gusto-client
 
-Python methods and CLI commands generated from 13 API operations.
+Python methods and CLI commands generated from 14 API operations.
 The generator produced every file in this project. No service-specific source
 patches are needed. This operation set does not imply coverage of every service API.
 
